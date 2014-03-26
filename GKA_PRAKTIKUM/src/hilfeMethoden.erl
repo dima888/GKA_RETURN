@@ -7,42 +7,85 @@
 %% ====================================================================
 %% API functions
 %% ====================================================================
--export([getValV/3, getValE/3]).
+-export([getValV/3, getValE/3, getAttrV/2, getAttrE/2]).
 
 
 
 %% ====================================================================
 %% Internal functions
 %% ====================================================================
+%%------------------------------ SELEKTOREN -------------------------------------
+%% Gibt den Wert zu einem Attributnamen von einer Edge im Graphen zurück, falls nicht
+%% vorhanden wird nil zurück gegeben
 getValE({V_ID1, V_ID2}, Attr, Graph) ->
-	nil.
-
-%% Gibt den Wert zu einem Attribut Namen von einem Vertex im Graphen zurück, falls nicht
-%% vorhanden, wird nil zurück geliefert
-getValV(V_ID, Attr, Graph) ->
 	{Vertices, EdgeD, EdgeU} = Graph,
-	Attribut = gibAttribut(Vertices, V_ID, []),
+	Edges = EdgeD ++ EdgeU,
+	Attribut = getAttrAndValEdge(Edges, {V_ID1, V_ID2}, []),
 	if
-		not (Attribut == []) -> gibAttributWert(Attribut);
+		not (Attribut == []) -> ([A] = Attribut), ([K,V] = A), V;
 						true -> nil
 	end.
 
-%% Gibt aus der Liste mit Attributnamen und Wert den Wert zurück
-gibAttributWert([Attribut]) ->
-	[AttrName, AttrValue] = Attribut,
-	AttrValue.
+%% Gibt den Wert zu einem Attributnamen von einem Vertex im Graphen zurück, falls nicht
+%% vorhanden, wird nil zurück gegeben
+getValV(V_ID, Attr, Graph) ->
+	{Vertices, EdgeD, EdgeU} = Graph,
+	Attribut = getAttrAndValVertex(Vertices, V_ID, []),
+	if
+		not (Attribut == []) -> ([A] = Attribut), ([K,V] = A), V;
+						true -> nil
+	end.
 
+%% Gibt alle verfügbaren Attribute für einen Vertex (V_ID) zurück, falls keiner vorhanden
+%% wird eine leere Liste zurück gegeben.
+getAttrV(V_ID, Graph) ->
+	{Vertices, EdgeD, EdgeU} = Graph,
+	AttributsAndValues = getAttrAndValVertex(Vertices, V_ID, []),
+	Attributs = [lists:nth(1, X) || X <- AttributsAndValues].
+
+%% Gibt alle verfügbaren Attribute für eine Kante ({V_ID1, V_ID2}) zurück, falls keiner
+%% vorhanden, wird eine leere Liste zurück gegeben.
+getAttrE({V_ID1, V_ID2}, Graph) ->
+	{Vertices, EdgeD, EdgeU} = Graph,
+	Edges = EdgeD ++ EdgeU,
+	AttributsAndValues = getAttrAndValEdge(Edges, {V_ID1, V_ID2}, []),
+	Attributs = [lists:nth(1, X) || X <- AttributsAndValues].
+
+%%----------------------------- Hilfsmethoden ------------------------------
 %% Sucht nach einem passenden Attribut und gibt den Attribut Namen und Wert in einer Liste
 %% zurück, falls nichts gefunden wird, wird eine leere Liste zurück gegeben
-gibAttribut([], V_ID, Attribut) ->
+getAttrAndValVertex([], V_ID, Attribut) ->
 	Attribut;
-gibAttribut([H|T], V_ID, Attribut) ->
+getAttrAndValVertex([H|T], V_ID, Attribut) ->
 	ID = lists:nth(2, H),
 	if
-		V_ID == ID -> gibAttribut(T, V_ID, Attribut ++ [[X,Y] || [X,Y] <- H]);
-			  true -> gibAttribut(T, V_ID, Attribut)
+		V_ID == ID -> getAttrAndValVertex(T, V_ID, Attribut ++ [[X,Y] || [X,Y] <- H]);
+			  true -> getAttrAndValVertex(T, V_ID, Attribut)
 	end.
-	
 
-%%hilfeMethoden:getValV(1, alter, {[[vertex, 2, [alter, 22]], [vertex, 1, [alter, 20]]],[],[]}).
+
+getAttrAndValEdge([], E_ID, Attribut) ->
+	Attribut;
+getAttrAndValEdge([H|T], E_ID, Attribut) ->
+	ID = lists:nth(2, H),
+	if
+		E_ID == ID -> getAttrAndValEdge(T, E_ID, Attribut ++ [[X, Y] || [X, Y] <- H]);
+			  true -> getAttrAndValEdge(T, E_ID, Attribut)
+	end.
+
+%%------------------------------------ TESTS ------------------------------------------
+%%*** getValE ***
+% hilfeMethoden:getValE({1,2}, alter, {[],[[edgeD, {1,2}, [alter, 22]]],[]}).
+% hilfeMethoden:getValE({1,2}, alter, {[],[[edgeD, {1,2}, [alter, 22]]],[[edgeU, {1,2}, [alter, 20]]]}).
+
+%%*** getValV ***
+% hilfeMethoden:getValV(1, alter, {[[vertex, 2, [alter, 22]], [vertex, 1, [alter, 20]]],[],[]}).
+
+%%*** getAttrV ***
+% hilfeMethoden:getAttrV(1, {[[vertex, 1, [alter, 20], [b, 4], [name, hamburg]]],[],[]}).
+
+%%*** getAttrE ***
+% hilfeMethoden:getAttrE({1,2}, {[],[[edgeD, {1,2}, [alter, 22], [name, hamburg]]],[]}). 
+% hilfeMethoden:getAttrE({1,2}, {[],[[edgeD, {1,2}, [alter, 22], [name, hamburg]]],[[edgeU, {1,2}, [strasse, kroonhorst]]]}). 
+
 %%cd("/Users/Flah/Dropbox/WorkSpace/GKA_RETURN/GKA_PRAKTIKUM/src").
