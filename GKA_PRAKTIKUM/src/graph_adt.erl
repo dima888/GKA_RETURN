@@ -7,7 +7,7 @@
 %% ====================================================================
 %% API functions
 %% ====================================================================
--export([new_AlGraph/0, addVertex/2, deleteVertex/2, addEdgeU/3]).
+-export([new_AlGraph/0, addVertex/2, deleteVertex/2, addEdgeU/3, addEdgeD/3, deleteEdge/3]).
 
 
 
@@ -41,6 +41,7 @@ BoolDoubleVertex = lists:member(NewItem, VertexList),
 
 %---------------- METHODE ---------------------
 %Loescht ein Vertex aus den Graphen, zurueck kommt logischerweise ein modifizierter Graph!
+%TODO: Alle Kanten muessen auch geloescht werden, die da dran haengen!!!!
 deleteVertex(V_ID, Graph) ->
 	{ Vertices, EdgesD, EdgesU } = Graph,
 %----------------- Precondition -------------------- 
@@ -54,6 +55,7 @@ ModifyVertexList = [ X || X <- Vertices, lists:nth(2, X) =/= V_ID],
 	end.
 
 %---------------- METHODE ---------------------
+% Zurzeit sind noch zwei mal die gleichen Kanten zwischen Zwei Knoten erlaubt
 addEdgeU(V_ID1, V_ID2, Graph) ->
 	{ Vertices, EdgesD, EdgesU } = Graph,
 %----------------- Precondition -------------------- 
@@ -62,21 +64,56 @@ addEdgeU(V_ID1, V_ID2, Graph) ->
 	Bool_V_ID1 = lists:member(V_ID1, VertexList),
 	Bool_V_ID2 = lists:member(V_ID2, VertexList),
 	
-%Hier wird geprueft, dass Doppelte Kanten nicht erlaubt werden	
-	EdgeUtupleInList = [ erlang:tuple_to_list(X) || X <- EdgesU],
-	BoolList = [ lists:member(V_ID1, X) and lists:member(V_ID2, X) || X <- EdgeUtupleInList],
-	BoolValue = lists:member(true, BoolList),	
+	
+%Normalerweise muesste auch das gleiche noch mal fuer EdgeD geprueft werden	
 
 if (not (Bool_V_ID1 and Bool_V_ID2)) -> nil;
-   BoolValue -> nil;
-	true -> { Vertices, EdgesD, ModifyEdgeU = EdgesU ++ [{V_ID1, V_ID2}] }
+	true -> { Vertices, EdgesD, ModifyEdgeU = EdgesU ++ [[edgeU, {V_ID1, V_ID2}] ] }
 end.
 
-
-
-
-
-
-
+%---------------- METHODE ---------------------
+% Zurzeit sind noch zwei mal die gleichen Kanten zwischen Zwei Knoten erlaubt
+addEdgeD(V_ID1, V_ID2, Graph) ->
+	{ Vertices, EdgesD, EdgesU } = Graph,
+%----------------- Precondition -------------------- 
+%Es wird geprueft werden, ob die IDs ueberhhaupt im Graf vorhanden sind
+	VertexList = [ lists:nth(2, X) || X <- Vertices],
+	Bool_V_ID1 = lists:member(V_ID1, VertexList),
+	Bool_V_ID2 = lists:member(V_ID2, VertexList),
 	
 	
+%Normalerweise muesste auch das gleiche noch mal fuer EdgeD geprueft werden	
+
+if (not (Bool_V_ID1 and Bool_V_ID2)) -> nil;
+	true -> { Vertices, ModifyEdgeD = EdgesD ++ [[edgeD, {V_ID1, V_ID2}] ], EdgesU }
+end.
+
+%---------------- METHODE ---------------------
+%TODO: nil liefern, wenn nichts geloescht werde kann
+deleteEdge(V_ID1, V_ID2, Graph) ->
+	{ Vertices, EdgesD, EdgesU } = Graph,
+	
+	
+	%%Loeschen der Kanten findet hier stat
+	DelEdgeDList = [ X || X <- EdgesD, ( element(1, lists:nth(2, X)) =/= V_ID1 ) or ( element(2, lists:nth(2, X)) =/= V_ID2 )],
+	DelEdgeUList = [ X || X <- EdgesU, ( element(1, lists:nth(2, X)) =/= V_ID1 ) or ( element(2, lists:nth(2, X)) =/= V_ID2 )],
+	io:write(length(DelEdgeDList)),
+	io:write(length(DelEdgeUList)),
+	io:write(length(EdgesD)),
+	io:write(length(EdgesU)),
+
+	%%---- Precondition ---- > Gib nil zurueck, wenn nichts geloescht wird
+	if ( ( length(DelEdgeDList) == length(EdgesD) ) and ( length(DelEdgeUList) == length(EdgesU) ) ) or ( ( length(EdgesD) == 0) and ( length(EdgesU) == 0 ) )  -> nil;
+	true -> { Vertices, DelEdgeDList, DelEdgeUList }
+	end.
+	
+	
+
+	%%------------------------Test Werte--------------------------------
+	%G1 = graph_adt:addVertex(1, graph_adt:new_AlGraph()).
+	%G2 = graph_adt:addVertex(2, G1).
+	%G3 = graph_adt:addEdgeD(1, 2, G2).
+	%G4 = graph_adt:addVertex(3, G3).
+	%G5 = graph_adt:addEdgeD(1, 3, G4). 
+	%G6 = graph_adt:addEdgeU(1, 3, G5).
+	%G7 = graph_adt:deleteEdge(1, 2, G6).
