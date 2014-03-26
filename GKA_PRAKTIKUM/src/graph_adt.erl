@@ -89,7 +89,7 @@ if (not (Bool_V_ID1 and Bool_V_ID2)) -> nil;
 end.
 
 %---------------- METHODE ---------------------
-%TODO: nil liefern, wenn nichts geloescht werde kann
+%TODO: Soll ungerichtete Kante loeschen, egal wie rum die reinfolge der IDs rein gegeben wird
 deleteEdge(V_ID1, V_ID2, Graph) ->
 	{ Vertices, EdgesD, EdgesU } = Graph,
 	
@@ -97,10 +97,6 @@ deleteEdge(V_ID1, V_ID2, Graph) ->
 	%%Loeschen der Kanten findet hier stat
 	DelEdgeDList = [ X || X <- EdgesD, ( element(1, lists:nth(2, X)) =/= V_ID1 ) or ( element(2, lists:nth(2, X)) =/= V_ID2 )],
 	DelEdgeUList = [ X || X <- EdgesU, ( element(1, lists:nth(2, X)) =/= V_ID1 ) or ( element(2, lists:nth(2, X)) =/= V_ID2 )],
-	io:write(length(DelEdgeDList)),
-	io:write(length(DelEdgeUList)),
-	io:write(length(EdgesD)),
-	io:write(length(EdgesU)),
 
 	%%---- Precondition ---- > Gib nil zurueck, wenn nichts geloescht wird
 	if ( ( length(DelEdgeDList) == length(EdgesD) ) and ( length(DelEdgeUList) == length(EdgesU) ) ) or ( ( length(EdgesD) == 0) and ( length(EdgesU) == 0 ) )  -> nil;
