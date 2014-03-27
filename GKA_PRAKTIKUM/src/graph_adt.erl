@@ -7,7 +7,7 @@
 %% ====================================================================
 %% API functions
 %% ====================================================================
--export([new_AlGraph/0, addVertex/2, deleteVertex/2, addEdgeU/3, addEdgeD/3, deleteEdge/3]).
+-export([new_AlGraph/0, addVertex/2, deleteVertex/2, addEdgeU/3, addEdgeD/3, deleteEdge/3, isNIl/1, getIncident/2, getVertexes/1, getEdges/1 ]).
 
 
 
@@ -41,7 +41,6 @@ BoolDoubleVertex = lists:member(NewItem, VertexList),
 
 %---------------- METHODE ---------------------
 %Loescht ein Vertex aus den Graphen, zurueck kommt logischerweise ein modifizierter Graph!
-%TODO: Alle Kanten muessen auch geloescht werden, die da dran haengen!!!!
 deleteVertex(V_ID, Graph) ->
 	{ Vertices, EdgesD, EdgesU } = Graph,
 %----------------- Precondition -------------------- 
@@ -96,7 +95,6 @@ end.
 deleteEdge(V_ID1, V_ID2, Graph) ->
 	{ Vertices, EdgesD, EdgesU } = Graph,
 	
-	
 	%%Loeschen der Kanten findet hier stat
 	DelEdgeDList = [ X || X <- EdgesD, ( element(1, lists:nth(2, X)) =/= V_ID1 ) or ( element(2, lists:nth(2, X)) =/= V_ID2 )],
 	DelEdgeUList = [ X || X <- EdgesU, ( element(1, lists:nth(2, X)) =/= V_ID1 ) or ( element(2, lists:nth(2, X)) =/= V_ID2 )],
@@ -106,6 +104,45 @@ deleteEdge(V_ID1, V_ID2, Graph) ->
 	true -> { Vertices, DelEdgeDList, DelEdgeUList }
 	end.
 	
+isNIl(Graph) -> 
+	{ Vertices, EdgesD, EdgesU } = Graph,
+	if ( (length(Vertices) == 0) and (length(EdgesD) == 0) and (length(EdgesU) == 0) ) ->
+		   true;
+	   true -> false
+	end.
+
+%---------------- METHODE ---------------------
+%post: ermittelt alle zur Ecke V_ID1 inzidenten Kanten
+%returns: Liste der Kanten
+%TODO: Bin mir nicht sicher, ob bei den gerichteten eine richtung eingehalten werden muss, wenn nicht, dann ist fertig
+getIncident(V_ID1, Graph) -> 
+	{ Vertices, EdgesD, EdgesU } = Graph,
+	DelEdgeDList = [ X || X <- EdgesD, ( element(1, lists:nth(2, X)) == V_ID1 ) or ( element(2, lists:nth(2, X)) == V_ID1 )],
+	DelEdgeUList = [ X || X <- EdgesU, ( element(1, lists:nth(2, X)) == V_ID1 ) or ( element(2, lists:nth(2, X)) == V_ID1 )],
+	Result = (DelEdgeDList ++ DelEdgeUList).
+
+%---------------- METHODE ---------------------
+%TODO: Hier moechte ich mich mit dir noch beraten
+%post: ermittelt alle zur Ecke V_ID1 adjazenten Ecken
+%returns: Liste von Tupeln {s/t/u, Ecken-ID}
+%wobei s bzw. t angibt, ob diese Ecke source oder
+%target zu V_ID1 ist oder u für ungerichtet
+getAdjacent(V_ID1,Graph) -> 
+	X = 5.
+
+%---------------- METHODE ---------------------
+%post: ermittelt alle Ecken des Graphen
+%returns: Liste der Ecken-IDs
+getVertexes(Graph) -> 
+	{ Vertices, EdgesD, EdgesU } = Graph,
+	AllVertexIDs = [ lists:nth(2, X) || X <- Vertices].
+
+%---------------- METHODE ---------------------
+%post: ermittelt alle Kanten des Graphen
+%returns: Liste der Kanten
+getEdges(Graph) -> 
+	{ Vertices, EdgesD, EdgesU } = Graph,
+	AllEdges = EdgesD ++ EdgesU. 
 	
 
 	%%------------------------Test Werte--------------------------------
@@ -116,4 +153,4 @@ deleteEdge(V_ID1, V_ID2, Graph) ->
 	%G5 = graph_adt:addEdgeD(1, 3, G4). 
 	%G6 = graph_adt:addEdgeU(1, 3, G5).
 	%G7 = graph_adt:deleteEdge(1, 2, G6).
-	%TestGraph = {[[vertex,1],[vertex,2],[vertex,3]], [[edgeD,{1,2}],[edgeD,{1,3}]], [[edgeU,{1,3}]]}
+	%Graph = {[[vertex,1],[vertex,2],[vertex,3]], [[edgeD,{1,2}],[edgeD,{1,3}]], [[edgeU,{1,3}]]}.
