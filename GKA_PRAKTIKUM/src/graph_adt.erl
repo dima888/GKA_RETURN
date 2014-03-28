@@ -123,7 +123,6 @@ getIncident(V_ID1, Graph) ->
 	Result = (DelEdgeDList ++ DelEdgeUList).
 
 %---------------- METHODE ---------------------
-%TODO: Hier moechte ich mich mit dir noch beraten
 %post: ermittelt alle zur Ecke V_ID1 adjazenten Ecken
 %returns: Liste von Tupeln {s/t/u, Ecken-ID}
 %wobei s bzw. t angibt, ob diese Ecke source oder
