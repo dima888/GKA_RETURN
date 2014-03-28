@@ -7,7 +7,8 @@
 %% ====================================================================
 %% API functions
 %% ====================================================================
--export([new_AlGraph/0, addVertex/2, deleteVertex/2, addEdgeU/3, addEdgeD/3, deleteEdge/3, isNIl/1, getIncident/2, getVertexes/1, getEdges/1 ]).
+-export([new_AlGraph/0, addVertex/2, deleteVertex/2, addEdgeU/3, addEdgeD/3, deleteEdge/3, isNIl/1,
+		 getAdjacent/2, getIncident/2, getVertexes/1, getEdges/1 ]).
 
 
 
@@ -128,7 +129,27 @@ getIncident(V_ID1, Graph) ->
 %wobei s bzw. t angibt, ob diese Ecke source oder
 %target zu V_ID1 ist oder u für ungerichtet
 getAdjacent(V_ID1,Graph) -> 
-	X = 5.
+	{ Vertices, EdgesD, EdgesU } = Graph,
+	
+	%------------- PRECONDITION --------------
+	VertexList = [ lists:nth(2, X) || X <- Vertices],
+	BoolDoubleVertex = lists:member(V_ID1, VertexList),
+	
+	if not BoolDoubleVertex -> nil; 
+		   true -> 
+	%Als erstes holle ich die Tupeln von den gerichtigen Kanten heraus. 
+	DirektedTupleList = [ lists:nth(2, X) || X <- EdgesD, ( element(1, lists:nth(2, X)) == V_ID1 ) or ( element(2, lists:nth(2, X)) == V_ID1 )],
+	DirektedTupleSourceList = [{s, element(1, X)} || X <- DirektedTupleList, element(2, X) == V_ID1],
+	DirektedTupleTargetList = [{t, element(2, X)} || X <- DirektedTupleList, element(1, X) == V_ID1],
+	
+	%jetzt kommt der Spaß mit den ungerichteten Kanten
+	UndirektedTupleListMain = [ lists:nth(2, X) || X <- EdgesU, ( element(1, lists:nth(2, X)) == V_ID1 ) or ( element(2, lists:nth(2, X)) == V_ID1 )],
+	UndirektedTupleListOne = [ {u, element(1, X)} || X <- UndirektedTupleListMain, element(2, X) == V_ID1],
+	UndirektedTupleListTwo = [ {u, element(2, X)} || X <- UndirektedTupleListMain, element(1, X) == V_ID1],
+
+	Result = DirektedTupleSourceList ++ DirektedTupleTargetList ++ UndirektedTupleListOne ++ UndirektedTupleListTwo
+	end.
+
 
 %---------------- METHODE ---------------------
 %post: ermittelt alle Ecken des Graphen
