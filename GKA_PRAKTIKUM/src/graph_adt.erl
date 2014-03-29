@@ -76,6 +76,7 @@ end.
 
 %% Gibt den Wert zu einem Attributnamen von einer Edge im Graphen zurück, falls nicht
 %% vorhanden wird nil zurück gegeben
+
 getValE({V_ID1, V_ID2}, Attr, Graph) ->
 	{Vertices, EdgeD, EdgeU} = Graph,
 	Edges = EdgeD ++ EdgeU,
@@ -87,6 +88,7 @@ getValE({V_ID1, V_ID2}, Attr, Graph) ->
 
 %% Gibt den Wert zu einem Attributnamen von einem Vertex im Graphen zurück, falls nicht
 %% vorhanden, wird nil zurück gegeben
+
 getValV(V_ID, Attr, Graph) ->
 	{Vertices, EdgeD, EdgeU} = Graph,
 	Attribut = getAttrAndValVertex(Vertices, V_ID, []),
@@ -97,6 +99,7 @@ getValV(V_ID, Attr, Graph) ->
 
 %% Gibt alle verfügbaren Attribute für einen Vertex (V_ID) zurück, falls keiner vorhanden
 %% wird eine leere Liste zurück gegeben.
+
 getAttrV(V_ID, Graph) ->
 	{Vertices, EdgeD, EdgeU} = Graph,
 	AttributsAndValues = getAttrAndValVertex(Vertices, V_ID, []),
@@ -104,6 +107,7 @@ getAttrV(V_ID, Graph) ->
 
 %% Gibt alle verfügbaren Attribute für eine Kante ({V_ID1, V_ID2}) zurück, falls keiner
 %% vorhanden, wird eine leere Liste zurück gegeben.
+
 getAttrE({V_ID1, V_ID2}, Graph) ->
 	{Vertices, EdgeD, EdgeU} = Graph,
 	Edges = EdgeD ++ EdgeU,
@@ -114,6 +118,7 @@ getAttrE({V_ID1, V_ID2}, Graph) ->
 
 %% Sucht nach einem passenden Attribut und gibt den Attribut Namen und Wert in einer Liste
 %% zurück, falls nichts gefunden wird, wird eine leere Liste zurück gegeben
+
 getAttrAndValVertex([], V_ID, Attribut) ->
 	Attribut;
 getAttrAndValVertex([H|T], V_ID, Attribut) ->
