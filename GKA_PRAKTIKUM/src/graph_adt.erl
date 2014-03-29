@@ -8,12 +8,7 @@
 %% API functions
 %% ====================================================================
 -export([new_AlGraph/0, addVertex/2, deleteVertex/2, addEdgeU/3, addEdgeD/3, deleteEdge/3, isNIl/1,
-<<<<<<< HEAD
 		 getAdjacent/2, getIncident/2, getVertexes/1, getEdges/1, includeValue/2 ]).
-=======
-		 getAdjacent/2, getIncident/2, getVertexes/1, getEdges/1, getValE/3, getValV/3, getAttrAndValEdge/3, getAttrAndValVertex/3, getAttrE/2, getAttrV/2, setValE/4, setValV/4
-]).
->>>>>>> FETCH_HEAD
 
 
 
