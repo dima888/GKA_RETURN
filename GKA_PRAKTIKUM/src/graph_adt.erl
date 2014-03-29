@@ -7,7 +7,8 @@
 %% ====================================================================
 %% API functions
 %% ====================================================================
--export([new_AlGraph/0, addVertex/2, deleteVertex/2, addEdgeU/3]).
+-export([new_AlGraph/0, addVertex/2, deleteVertex/2, addEdgeU/3, addEdgeD/3, deleteEdge/3, isNIl/1,
+		 getAdjacent/2, getIncident/2, getVertexes/1, getEdges/1 ]).
 
 
 
@@ -47,13 +48,18 @@ deleteVertex(V_ID, Graph) ->
 VertexList = [ lists:nth(2, X) || X <- Vertices], %Alle Vertex IDs
 BoolDoubleVertex = lists:member(V_ID, VertexList),
 
-%----------------- IMPL --------------------
+%----------------- IMPL --------------------	
 ModifyVertexList = [ X || X <- Vertices, lists:nth(2, X) =/= V_ID],
 	if not BoolDoubleVertex-> nil; %Hier waerte schoener explizit zusagen, wo der Fehler ist, ist einfach freundlicher!
-	true -> ModifyGraph = {ModifyVertexList, EdgesD, EdgesU}
+	true ->
+		%Wir loeschen alle Kanten, die an den Vertex haengen
+ModifyEdgesD  = [ X || X <- EdgesD, ( element(1, lists:nth(2, X)) =/= V_ID ) and ( element(2, lists:nth(2, X)) =/= V_ID )],
+ModifyEdgesU  = [ X || X <- EdgesD, ( element(1, lists:nth(2, X)) =/= V_ID ) and ( element(2, lists:nth(2, X)) =/= V_ID )],
+		ModifyGraph = {ModifyVertexList, ModifyEdgesD, ModifyEdgesU}
 	end.
 
 %---------------- METHODE ---------------------
+% Zurzeit sind noch zwei mal die gleichen Kanten zwischen Zwei Knoten erlaubt
 addEdgeU(V_ID1, V_ID2, Graph) ->
 	{ Vertices, EdgesD, EdgesU } = Graph,
 %----------------- Precondition -------------------- 
@@ -62,14 +68,11 @@ addEdgeU(V_ID1, V_ID2, Graph) ->
 	Bool_V_ID1 = lists:member(V_ID1, VertexList),
 	Bool_V_ID2 = lists:member(V_ID2, VertexList),
 	
-%Hier wird geprueft, dass Doppelte Kanten nicht erlaubt werden	
-	EdgeUtupleInList = [ erlang:tuple_to_list(X) || X <- EdgesU],
-	BoolList = [ lists:member(V_ID1, X) and lists:member(V_ID2, X) || X <- EdgeUtupleInList],
-	BoolValue = lists:member(true, BoolList),	
+	
+%Normalerweise muesste auch das gleiche noch mal fuer EdgeD geprueft werden	
 
 if (not (Bool_V_ID1 and Bool_V_ID2)) -> nil;
-   BoolValue -> nil;
-	true -> { Vertices, EdgesD, ModifyEdgeU = EdgesU ++ [{V_ID1, V_ID2}] }
+	true -> { Vertices, EdgesD, ModifyEdgeU = EdgesU ++ [[edgeU, {V_ID1, V_ID2}] ] }
 end.
 
 %%------------------------------ SELEKTOREN -------------------------------------
@@ -114,6 +117,28 @@ getAttrE({V_ID1, V_ID2}, Graph) ->
 	AttributsAndValues = getAttrAndValEdge(Edges, {V_ID1, V_ID2}, []),
 	Attributs = [lists:nth(1, X) || X <- AttributsAndValues].
 
+%%-----------------------------------MUTATOREN-----------------------------------------
+
+%% Setzt den Attributwert von Attr auf Val von der Kante im Graphen, wenn nicht vorhanden
+%% wird ein Attribut angelegt, sonst verändert
+
+setValE({V_ID1, V_ID2}, Attr, Val, Graph) ->
+	{Vertices, EdgesD, EdgesU} = Graph,
+	EdgeInList = [X || X <- EdgesD, (element(1, lists:nth(2, X))) == V_ID1],
+	[Edge] = EdgeInList,
+	Edges = EdgesD ++ EdgesU,
+	AttributsAndValues = getAttrAndValEdge(Edges, {V_ID1, V_ID2}, []),
+	if
+		AttributsAndValues == [] -> {Vertices, [Edge ++ [[Attr, Val]]], EdgesU};
+							true -> io:fwrite("Fick die Welt!")
+	end.
+
+%% Setzt den Attributwert von Attr auf Val von dem Knoten im Graphen, wenn nicht vorhanden
+%% wird ein Attribut angelegt, sonst verändert
+
+setValV(V_ID, Attr, Val, Graph) ->
+	nil.
+
 %%----------------------------- Hilfsmethoden ------------------------------
 
 %% Sucht nach einem passenden Attribut und gibt den Attribut Namen und Wert in einer Liste
@@ -155,8 +180,101 @@ getAttrAndValEdge([H|T], E_ID, Attribut) ->
 % hilfeMethoden:getAttrE({1,2}, {[],[[edgeD, {1,2}, [alter, 22], [name, hamburg]]],[[edgeU, {1,2}, [strasse, kroonhorst]]]}).
 
 
-
-
-
+%---------------- METHODE ---------------------
+% Zurzeit sind noch zwei mal die gleichen Kanten zwischen Zwei Knoten erlaubt
+addEdgeD(V_ID1, V_ID2, Graph) ->
+	{ Vertices, EdgesD, EdgesU } = Graph,
+%----------------- Precondition -------------------- 
+%Es wird geprueft werden, ob die IDs ueberhhaupt im Graf vorhanden sind
+	VertexList = [ lists:nth(2, X) || X <- Vertices],
+	Bool_V_ID1 = lists:member(V_ID1, VertexList),
+	Bool_V_ID2 = lists:member(V_ID2, VertexList),
 	
+%Normalerweise muesste auch das gleiche noch mal fuer EdgeD geprueft werden	
+if (not (Bool_V_ID1 and Bool_V_ID2)) -> nil;
+	true -> { Vertices, ModifyEdgeD = EdgesD ++ [[edgeD, {V_ID1, V_ID2}] ], EdgesU }
+end.
+
+%---------------- METHODE ---------------------
+%TODO: Soll ungerichtete Kante loeschen, egal wie rum die reinfolge der IDs rein gegeben wird
+deleteEdge(V_ID1, V_ID2, Graph) ->
+	{ Vertices, EdgesD, EdgesU } = Graph,
 	
+	%%Loeschen der Kanten findet hier stat
+	DelEdgeDList = [ X || X <- EdgesD, ( element(1, lists:nth(2, X)) =/= V_ID1 ) or ( element(2, lists:nth(2, X)) =/= V_ID2 )],
+	DelEdgeUList = [ X || X <- EdgesU, ( element(1, lists:nth(2, X)) =/= V_ID1 ) or ( element(2, lists:nth(2, X)) =/= V_ID2 )],
+
+	%%---- Precondition ---- > Gib nil zurueck, wenn nichts geloescht wird
+	if ( ( length(DelEdgeDList) == length(EdgesD) ) and ( length(DelEdgeUList) == length(EdgesU) ) ) or ( ( length(EdgesD) == 0) and ( length(EdgesU) == 0 ) )  -> nil;
+	true -> { Vertices, DelEdgeDList, DelEdgeUList }
+	end.
+	
+isNIl(Graph) -> 
+	{ Vertices, EdgesD, EdgesU } = Graph,
+	if ( (length(Vertices) == 0) and (length(EdgesD) == 0) and (length(EdgesU) == 0) ) ->
+		   true;
+	   true -> false
+	end.
+
+%---------------- METHODE ---------------------
+%post: ermittelt alle zur Ecke V_ID1 inzidenten Kanten
+%returns: Liste der Kanten
+%TODO: Bin mir nicht sicher, ob bei den gerichteten eine richtung eingehalten werden muss, wenn nicht, dann ist fertig
+getIncident(V_ID1, Graph) -> 
+	{ Vertices, EdgesD, EdgesU } = Graph,
+	DelEdgeDList = [ X || X <- EdgesD, ( element(1, lists:nth(2, X)) == V_ID1 ) or ( element(2, lists:nth(2, X)) == V_ID1 )],
+	DelEdgeUList = [ X || X <- EdgesU, ( element(1, lists:nth(2, X)) == V_ID1 ) or ( element(2, lists:nth(2, X)) == V_ID1 )],
+	Result = (DelEdgeDList ++ DelEdgeUList).
+
+%---------------- METHODE ---------------------
+%post: ermittelt alle zur Ecke V_ID1 adjazenten Ecken
+%returns: Liste von Tupeln {s/t/u, Ecken-ID}
+%wobei s bzw. t angibt, ob diese Ecke source oder
+%target zu V_ID1 ist oder u für ungerichtet
+getAdjacent(V_ID1,Graph) -> 
+	{ Vertices, EdgesD, EdgesU } = Graph,
+	
+	%------------- PRECONDITION --------------
+	VertexList = [ lists:nth(2, X) || X <- Vertices],
+	BoolDoubleVertex = lists:member(V_ID1, VertexList),
+	
+	if not BoolDoubleVertex -> nil; 
+		   true -> 
+	%Als erstes holle ich die Tupeln von den gerichtigen Kanten heraus. 
+	DirektedTupleList = [ lists:nth(2, X) || X <- EdgesD, ( element(1, lists:nth(2, X)) == V_ID1 ) or ( element(2, lists:nth(2, X)) == V_ID1 )],
+	DirektedTupleSourceList = [{s, element(1, X)} || X <- DirektedTupleList, element(2, X) == V_ID1],
+	DirektedTupleTargetList = [{t, element(2, X)} || X <- DirektedTupleList, element(1, X) == V_ID1],
+	
+	%jetzt kommt der Spaß mit den ungerichteten Kanten
+	UndirektedTupleListMain = [ lists:nth(2, X) || X <- EdgesU, ( element(1, lists:nth(2, X)) == V_ID1 ) or ( element(2, lists:nth(2, X)) == V_ID1 )],
+	UndirektedTupleListOne = [ {u, element(1, X)} || X <- UndirektedTupleListMain, element(2, X) == V_ID1],
+	UndirektedTupleListTwo = [ {u, element(2, X)} || X <- UndirektedTupleListMain, element(1, X) == V_ID1],
+
+	Result = DirektedTupleSourceList ++ DirektedTupleTargetList ++ UndirektedTupleListOne ++ UndirektedTupleListTwo
+	end.
+
+
+%---------------- METHODE ---------------------
+%post: ermittelt alle Ecken des Graphen
+%returns: Liste der Ecken-IDs
+getVertexes(Graph) -> 
+	{ Vertices, EdgesD, EdgesU } = Graph,
+	AllVertexIDs = [ lists:nth(2, X) || X <- Vertices].
+
+%---------------- METHODE ---------------------
+%post: ermittelt alle Kanten des Graphen
+%returns: Liste der Kanten
+getEdges(Graph) -> 
+	{ Vertices, EdgesD, EdgesU } = Graph,
+	AllEdges = EdgesD ++ EdgesU. 
+	
+
+%%------------------------Test Werte--------------------------------
+%G1 = graph_adt:addVertex(1, graph_adt:new_AlGraph()).
+%G2 = graph_adt:addVertex(2, G1).
+%G3 = graph_adt:addEdgeD(1, 2, G2).
+%G4 = graph_adt:addVertex(3, G3).
+%G5 = graph_adt:addEdgeD(1, 3, G4). 
+%G6 = graph_adt:addEdgeU(1, 3, G5).
+%G7 = graph_adt:deleteEdge(1, 2, G6).
+%Graph = {[[vertex,1],[vertex,2],[vertex,3]], [[edgeD,{1,2}],[edgeD,{1,3}]], [[edgeU,{1,3}]]}.
