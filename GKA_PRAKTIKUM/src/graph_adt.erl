@@ -8,8 +8,12 @@
 %% API functions
 %% ====================================================================
 -export([new_AlGraph/0, addVertex/2, deleteVertex/2, addEdgeU/3, addEdgeD/3, deleteEdge/3, isNIl/1,
+<<<<<<< HEAD
+		 getAdjacent/2, getIncident/2, getVertexes/1, getEdges/1, includeValue/2 ]).
+=======
 		 getAdjacent/2, getIncident/2, getVertexes/1, getEdges/1, getValE/3, getValV/3, getAttrAndValEdge/3, getAttrAndValVertex/3, getAttrE/2, getAttrV/2, setValE/4, setValV/4
 ]).
+>>>>>>> FETCH_HEAD
 
 
 
@@ -268,7 +272,6 @@ getVertexes(Graph) ->
 getEdges(Graph) -> 
 	{ Vertices, EdgesD, EdgesU } = Graph,
 	AllEdges = EdgesD ++ EdgesU. 
-	
 
 %%------------------------Test Werte--------------------------------
 %G1 = graph_adt:addVertex(1, graph_adt:new_AlGraph()).
@@ -279,3 +282,19 @@ getEdges(Graph) ->
 %G6 = graph_adt:addEdgeU(1, 3, G5).
 %G7 = graph_adt:deleteEdge(1, 2, G6).
 %Graph = {[[vertex,1],[vertex,2],[vertex,3]], [[edgeD,{1,2}],[edgeD,{1,3}]], [[edgeU,{1,3}]]}.
+
+%---------- HILFSMETHODEN -----------
+includeValue(Val, Graph) ->
+	{Vertices, EdgeD, EdgeU} = Graph,
+	Attributs = getAttrAndValVertex(Vertices, []),
+	Value = [X || X <- Attributs, lists:nth(2, X) == Val],
+	
+	if
+		Value == [] -> false;
+			   true -> true
+	end.
+
+getAttrAndValVertex([], Attribut) ->
+	Attribut;
+getAttrAndValVertex([H|T],  Attribut) ->
+	getAttrAndValVertex(T, Attribut ++ [[X,Y] || [X,Y] <- H]).
