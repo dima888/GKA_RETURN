@@ -49,7 +49,8 @@ costDirektedImport(Datei, Graph, V_ID, Device) ->
 	%Hier kommen die Pruefungen ob die IDs in den Graphen rein duerfen
 	BoolValVertexFirst = graph_adt:includeValue(SourceValName, Graph),
 	BoolValVertexSecond = graph_adt:includeValue(TargetValName, Graph),
- 	
+ 
+	
 	%%TODO: Hier bin ich stehen geblieben
 	if BoolValVertexFirst ->
 		   ID = V_ID + 1,
@@ -58,7 +59,9 @@ costDirektedImport(Datei, Graph, V_ID, Device) ->
 		   ID2 = V_ID + 2,
 		   graph_adt:addvertex(ID2, Graph);
 	   true -> nil
-	end.
+	end,
+	
+	X = 4.
 
 	%Graph wird befuelt
 	
