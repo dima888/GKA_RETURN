@@ -7,13 +7,7 @@
 %% ====================================================================
 %% API functions
 %% ====================================================================
--export([new_AlGraph/0, addVertex/2, deleteVertex/2, addEdgeU/3, addEdgeD/3, deleteEdge/3, isNIl/1,
-<<<<<<< HEAD
-		 getAdjacent/2, getIncident/2, getVertexes/1, getEdges/1, includeValue/2 ]).
-=======
-		 getAdjacent/2, getIncident/2, getVertexes/1, getEdges/1, getValE/3, getValV/3, getAttrAndValEdge/3, getAttrAndValVertex/3, getAttrE/2, getAttrV/2, setValE/4, setValV/4
-]).
->>>>>>> FETCH_HEAD
+-export([new_AlGraph/0, addVertex/2, deleteVertex/2, addEdgeU/3, addEdgeD/3, deleteEdge/3, isNIl/1,	 getAdjacent/2, getIncident/2, getVertexes/1, getEdges/1, getValV/3, getValE/3, getAttrV/2, getAttrE/2, setValE/4, setValV/4]).
 
 
 
@@ -122,27 +116,119 @@ getAttrE({V_ID1, V_ID2}, Graph) ->
 	AttributsAndValues = getAttrAndValEdge(Edges, {V_ID1, V_ID2}, []),
 	Attributs = [lists:nth(1, X) || X <- AttributsAndValues].
 
-%%-----------------------------------MUTATOREN-----------------------------------------
+%%----------------------------------- MUTATOREN -----------------------------------------
 
 %% Setzt den Attributwert von Attr auf Val von der Kante im Graphen, wenn nicht vorhanden
 %% wird ein Attribut angelegt, sonst ver‰ndert
 
 setValE({V_ID1, V_ID2}, Attr, Val, Graph) ->
 	{Vertices, EdgesD, EdgesU} = Graph,
-	EdgeInList = [X || X <- EdgesD, (element(1, lists:nth(2, X))) == V_ID1],
-	[Edge] = EdgeInList,
 	Edges = EdgesD ++ EdgesU,
-	AttributsAndValues = getAttrAndValEdge(Edges, {V_ID1, V_ID2}, []),
+	
+	%Einzelnen Edge aus dem Graphen extrahieren
+	EdgeInList = [X || X <- Edges, (lists:nth(2, X) == {V_ID1, V_ID2}) or (lists:nth(2, X) == {V_ID2, V_ID1})],
+	
 	if
-		AttributsAndValues == [] -> {Vertices, [Edge ++ [[Attr, Val]]], EdgesU};
-							true -> io:fwrite("Fick die Welt!")
+		%Pr¸fen ob ¸berhaupt eine Edge mit der ¸bergebenen ID im Graphen existiert
+		EdgeInList == [] -> nil;
+					
+					true -> %Edge aus der Edgelist extrahieren
+							[Edge] = EdgeInList,
+							
+							%Edgetyp extrahieren
+							EdgeType = lists:nth(1, Edge),
+						
+							%Pr¸fen um welche Edgeart es sich handelt, da unterschiedliches verhalten
+							if
+													 %Alle gerichteten Kanten filtern auﬂer die ver‰nderte
+								EdgeType == edgeD -> EdgesDNew = [X || X <- EdgesD, lists:nth(2, X) =/= {V_ID1, V_ID2}],
+													 							
+													 %Alle Attribute und Werte extrahieren
+													 AttributsAndValues = getAttrAndValEdge(Edges, {V_ID1, V_ID2}, []),
+													 
+													 if
+														%Falls keine Attribute vorhanden sind, einfach das ¸bergebene Attribute und den Wert an die Edge anh‰ngen
+														AttributsAndValues == [] -> {Vertices, EdgesDNew ++ [Edge ++ [[Attr, Val]]], EdgesU};
+								
+														%Falls bereits Attribute vorhanden sind, pr¸fen ob das ¸bergebene Attribut zu ihnen gehˆrt
+														true -> FlattenList = lists:flatten(AttributsAndValues), Included = lists:member(Attr, FlattenList),
+																if
+																	%Attributwert ersetzten
+																	Included == true -> ListWithoutAttr = [[X, Y] || [X, Y] <- Edge, X =/= Attr], 
+																			     	{Vertices, EdgesDNew ++ [[EdgeType, {V_ID1, V_ID2}] ++ ListWithoutAttr ++ [[Attr, Val]]], EdgesU};
+																			
+																				%Attribut und Wert anh‰ngen
+															                    true -> EdgeType = lists:nth(1, Edge), EdgeID = lists:nth(2, Edge),
+																			     	    {Vertices, EdgesDNew ++ [[EdgeType, {V_ID1, V_ID2}] ++ AttributsAndValues ++ [[Attr, Val]]], EdgesU} 
+																end
+													 end;
+								
+													 %Alle ungerichteten Kanten filtern auﬂer die ver‰nderte
+								EdgeType == edgeU -> EdgesUNew = [X || X <- EdgesU, ((lists:nth(2, X) =/= {V_ID1, V_ID2}) and (lists:nth(2, X) =/= {V_ID2, V_ID1}))],
+													 
+													 %Alle Attribute und Werte extrahieren
+													 AttributsAndValues = getAttrAndValEdge(Edges, {V_ID1, V_ID2}, []) ++ getAttrAndValEdge(Edges, {V_ID2, V_ID1}, []),
+
+													 if
+														%Falls keine Attribute vorhanden sind, einfach das ¸bergebene Attribute und den Wert an die Edge anh‰ngen
+														AttributsAndValues == [] -> {Vertices, EdgesD, EdgesUNew ++ [Edge ++ [[Attr, Val]]]};
+								
+														%Falls bereits Attribute vorhanden sind, pr¸fen ob das ¸bergebene Attribut zu ihnen gehˆrt
+														true -> FlattenList = lists:flatten(AttributsAndValues), Included = lists:member(Attr, FlattenList),
+																if
+																	%Attributwert ersetzten
+																	Included == true -> ListWithoutAttr = [[X, Y] || [X, Y] <- Edge, X =/= Attr], 
+																			     	{Vertices, EdgesD, EdgesUNew ++ [[EdgeType, {V_ID1, V_ID2}] ++ ListWithoutAttr ++ [[Attr, Val]]]};
+																			
+																				%Attribut und Wert anh‰ngen
+															                    true -> EdgeType = lists:nth(1, Edge), EdgeID = lists:nth(2, Edge),
+																			     	    {Vertices, EdgesD, EdgesUNew ++ [[EdgeType, {V_ID1, V_ID2}] ++ AttributsAndValues ++ [[Attr, Val]]]} 
+																end
+													 end;
+								
+											 %Fehler, da weder edgeD, noch edgeU
+											 true -> nil
+							end 
 	end.
 
 %% Setzt den Attributwert von Attr auf Val von dem Knoten im Graphen, wenn nicht vorhanden
-%% wird ein Attribut angelegt, sonst ver‰ndert
+%% wird ein Attribut angelegt, sonst ver‰ndert 
 
 setValV(V_ID, Attr, Val, Graph) ->
-	nil.
+	{Vertices, EdgesD, EdgesU} = Graph,
+	
+	%Einzelnen Edge aus dem Graphen extrahieren
+	VertexInList = [X || X <- Vertices, lists:nth(2, X) == V_ID],
+	
+	if
+		%Pr¸fen ob ¸berhaupt eine Edge mit der ¸bergebenen ID im Graphen existiert
+		VertexInList == [] -> nil;
+					
+					true -> %Vertex aus der Vertexlist extrahieren
+							[Vertex] = VertexInList,
+						
+							%Alle Vertices filtern auﬂer die zu ver‰ndernde
+							VerticesNew = [X || X <- Vertices, lists:nth(2, X) =/= V_ID],
+							
+							%Alle Attribute und Werte extrahieren
+							AttributsAndValues = getAttrAndValVertex(Vertices, V_ID, []),
+							
+							if
+								%Falls keine Attributwerte vorhanden sind, einfach hinten anh‰ngen
+								AttributsAndValues == [] -> {VerticesNew ++ [Vertex ++ [[Attr, Val]]], EdgesD, EdgesU};
+													
+															%Pr¸fen ob ¸bergebenes Attr schon existiert
+													true -> FlattenList = lists:flatten(AttributsAndValues), Included = lists:member(Attr, FlattenList),
+															if
+																%Attributwert ersetzten
+																Included == true -> ListWithoutAttr = [[X, Y] || [X, Y] <- Vertex, X =/= Attr], 
+																			     	{VerticesNew ++ [[vertex, V_ID] ++ ListWithoutAttr ++ [[Attr, Val]]], EdgesD, EdgesU};
+																			
+																			%Attribut und Wert anh‰ngen
+														                    true -> {VerticesNew ++ [[vertex, V_ID] ++ AttributsAndValues ++ [[Attr, Val]]], EdgesD, EdgesU} 
+															end
+							end
+	end.
 
 %%----------------------------- Hilfsmethoden ------------------------------
 
@@ -184,6 +270,19 @@ getAttrAndValEdge([H|T], E_ID, Attribut) ->
 % hilfeMethoden:getAttrE({1,2}, {[],[[edgeD, {1,2}, [alter, 22], [name, hamburg]]],[]}). 
 % hilfeMethoden:getAttrE({1,2}, {[],[[edgeD, {1,2}, [alter, 22], [name, hamburg]]],[[edgeU, {1,2}, [strasse, kroonhorst]]]}).
 
+%%*** setValE ***
+% hilfeMethoden:setValE({1,2}, alter, 20, {[],[[edgeD, {1,2}]],[]}).
+% hilfeMethoden:setValE({1,2}, alter, 20, {[],[[edgeD, {1,2}, [name, hamburg]]],[]}).
+% hilfeMethoden:setValE({1,2}, alter, 20, {[],[[edgeD, {1,2}, [alter, 25], [name, hamburg]]],[]}).
+% hilfeMethoden:setValE({4,5}, alter, 30, {[],[[edgeD, {1,2}, [alter, 25], [name, hamburg]], [edgeD, {4,5}, [alter, 18]]],[]}).
+% hilfeMethoden:setValE({4,5}, alter, 30, {[], [], [[edgeU, {1,2}, [alter, 25], [name, hamburg]], [edgeU, {4,5}, [alter, 18]]]}).
+
+%*** setValV ***
+% hilfeMethoden:setValV(1, alter, 20, {[[vertex, 1]],[],[]}).
+% hilfeMethoden:setValV(1, alter, 20, {[[vertex, 1, [name, hamburg]]],[],[]}).
+% hilfeMethoden:setValV(1, alter, 20, {[[vertex, 1, [alter, 25]]],[],[]}).
+% hilfeMethoden:setValV(1, alter, 20, {[[vertex, 1, [alter, 25], [name, hamburg]]],[],[]}).
+% hilfeMethoden:setValV(1, alter, 20, {[[vertex, 1, [alter, 25], [name, hamburg]], [vertex, 2, [alter, 6], [farbe, blau]]],[],[]}).
 
 %---------------- METHODE ---------------------
 % Zurzeit sind noch zwei mal die gleichen Kanten zwischen Zwei Knoten erlaubt
