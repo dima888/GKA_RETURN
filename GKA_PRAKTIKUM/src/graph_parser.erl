@@ -20,21 +20,19 @@ importGraph(Datei, Attr) when Attr == "cost" ->
 	 
 %---------- HILFS FUNKTION ------------
 costImport(Datei) -> 
-	Graph = graph_adt:new_AlGraph(),
 	%Datei = "C:\\Users\\foxhound\\Desktop\\test.txt",
-	
 	{ok, Device} = file:open(Datei, [read]),
 	
 	%Erste Zeile, wo angegeben wird ob es gerichtet oder ungerichtet ist
 	Row = io:get_line(Device, []),
 	
-	%Unsere IDs fangen bei 1 an
-	if Row == "#gerichtet\n" -> costDirektedImport(Datei, Graph, 1, Device);
+	%Unsere IDs fangen bei 1 an, hier 0, da es in der verarbeitung so angegeben wird: V_ID++
+	if Row == "#gerichtet\n" -> costDirektedImport(Datei, graph_adt:new_AlGraph(), 0, Device);
 	   true -> constUndirektedImport(Datei)
 	end.
 
 %---------- HILFS FUNKTION ------------
-costDirektedImport(Datei, Graph, V_ID1, Device) ->
+costDirektedImport(Datei, Graph, V_ID, Device) ->
 
 	%FilePath = "C:\\Users\\foxhound\\Desktop\\test.txt",
 	%{ok, Device} = file:open(Datei, [read]),
@@ -44,12 +42,23 @@ costDirektedImport(Datei, Graph, V_ID1, Device) ->
 	PartGraph = string:tokens(Row, ", \n "),
 	
 	%Alle Attribute aus der Textdatei raus hollen
-	SourceAttrName = lists:nth(1, PartGraph),
-	TargetAttrName = lists:nth(2, PartGraph),
-	CoustAttr = lists:nth(3, PartGraph).
+	SourceValName = lists:nth(1, PartGraph),
+	TargetValName = lists:nth(2, PartGraph),
+	CoustVal = lists:nth(3, PartGraph),
 
 	%Hier kommen die Pruefungen ob die IDs in den Graphen rein duerfen
-	
+	BoolValVertexFirst = graph_adt:includeValue(SourceValName, Graph),
+	BoolValVertexSecond = graph_adt:includeValue(TargetValName, Graph),
+ 	
+	%%TODO: Hier bin ich stehen geblieben
+	if BoolValVertexFirst ->
+		   ID = V_ID + 1,
+		   graph_adt:addvertex(ID, Graph);
+	   BoolValVertexSecond -> 
+		   ID2 = V_ID + 2,
+		   graph_adt:addvertex(ID2, Graph);
+	   true -> nil
+	end.
 
 	%Graph wird befuelt
 	
