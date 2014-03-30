@@ -33,11 +33,12 @@ costImport(Datei) ->
 
 %---------- HILFS FUNKTION ------------
 %TODO: Richtige Abbruch bedingung implementieren
-costDirektedImport(Datei, Graph, V_ID1, V_ID2, Device) when V_ID1 == 9 -> Graph;
+costDirektedImport(Datei, Graph, V_ID1, V_ID2, Device) when V_ID1 == 15 -> Graph;
 costDirektedImport(Datei, Graph, V_ID1, V_ID2, Device) ->
 	%FilePath = "C:\\Users\\foxhound\\Desktop\\test.txt",
+	%FilePath = "C:\\Users\\foxhound\\Desktop\\Beispiel3.txt",
 	Row = io:get_line(Device, []),
-	io:write(Row),
+%% 	io:write(Row),
 	
 	PartGraph = string:tokens(Row, ", \n "),
 	
@@ -50,10 +51,26 @@ costDirektedImport(Datei, Graph, V_ID1, V_ID2, Device) ->
 	BoolValVertexFirst = graph_adt:includeValue(SourceValName, Graph),
 	BoolValVertexSecond = graph_adt:includeValue(TargetValName, Graph),
 	
-	if ( (BoolValVertexFirst  == true) and (BoolValVertexSecond == true)  ) ->
-		   %Der Fall ist unsinn, also waehre unsinnig von benutzer so einen graphen zu erstellen, 
+	if ( (BoolValVertexFirst  == true) and (BoolValVertexSecond == true)  ) -> 
+		   %TODO: Lesen und beraten, gegebenfalls in der Vorlesung ansprechen ob wir diesen Fall wirklich benoetigen
 		   %in diesen Fall packt er ein und die gleiche Kante doppeln rein. Deshalb behandele ich diesen Fall erstmal nicht!
-		   X = unsinn;
+	
+		   %Die schon vorhandene ID ausgraben
+			Buffer = graph_adt:getIDFromAttrValue(SourceValName, Graph),
+			ExistingID_1 = lists:nth(1, Buffer),
+		   
+			%Die schon vorhandene ID ausgraben
+			Buffer_2 = graph_adt:getIDFromAttrValue(TargetValName, Graph),
+			ExistingID_2 = lists:nth(1, Buffer_2),
+			
+			%Kante hinzu fuegen
+			ModifyGraph = graph_adt:addEdgeD(ExistingID_1, ExistingID_2, Graph),
+			
+			%Attribut an die Kante kleben
+			ModifyGraph_2 = graph_adt:setValE({ExistingID_1, ExistingID_2}, cost, CoustVal, ModifyGraph),
+			
+			%Zurueck in die Rekursion
+			costDirektedImport(Datei, ModifyGraph_2, V_ID1 + 2, V_ID2 + 2, Device);
 		   
 	   %In diesen Fall ist die V_ID1 schon vorhanden und V_ID2 noch nicht
 	   ( (BoolValVertexFirst  == true) and (BoolValVertexSecond == false)  ) -> 
