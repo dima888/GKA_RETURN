@@ -1,13 +1,16 @@
 %% @author foxhound
 %% @doc @todo Add description to graph_parser.
-
-
 -module(graph_parser).
 
 %% ====================================================================
 %% API functions
 %% ====================================================================
 -compile(export_all).
+<<<<<<< HEAD
+=======
+
+%graph_parser:importGraph("//Users//Flah//Desktop//test.graph", "cost").
+>>>>>>> ece8d79bbd9fb305b8975fc999e4661f780bb42b
 
 %% ====================================================================
 %% Internal functions
