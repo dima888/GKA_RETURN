@@ -7,7 +7,7 @@
 %% ====================================================================
 %% API functions
 %% ====================================================================
--export([importGraph/2]).
+-compile(export_all).
 
 %% ====================================================================
 %% Internal functions
@@ -128,7 +128,7 @@ maxisDirektedImport(Datei, Graph, V_ID1, V_ID2, Device, Count) ->
 			ModifyGraph_2 = graph_adt:setValV(V_ID1, name, TargetValName, ModifyGraph),
 		   
 		   	%Die schon vorhandene ID ausgraben
-			Buffer = graph_adt:getIDFromAttrValue(SourceValName, ModifyGraph_2),
+			Buffer = graph_adt:getIDFromAttrValue(TargetValName, ModifyGraph_2),
 			ExistingID = lists:nth(1, Buffer),
 		   
 		   %Kante hinzu fuegen
@@ -245,7 +245,7 @@ maxisUndirektedImport(Datei, Graph, V_ID1, V_ID2, Device, Count) ->
 			ModifyGraph_2 = graph_adt:setValV(V_ID1, name, TargetValName, ModifyGraph),
 		   
 		   	%Die schon vorhandene ID ausgraben
-			Buffer = graph_adt:getIDFromAttrValue(SourceValName, ModifyGraph_2),
+			Buffer = graph_adt:getIDFromAttrValue(TargetValName, ModifyGraph_2),
 			ExistingID = lists:nth(1, Buffer),
 		   
 		   %Kante hinzu fuegen
@@ -362,7 +362,7 @@ costDirektedImport(Datei, Graph, V_ID1, V_ID2, Device, Count) ->
 			ModifyGraph_2 = graph_adt:setValV(V_ID1, name, TargetValName, ModifyGraph),
 		   
 		   	%Die schon vorhandene ID ausgraben
-			Buffer = graph_adt:getIDFromAttrValue(SourceValName, ModifyGraph_2),
+			Buffer = graph_adt:getIDFromAttrValue(TargetValName, ModifyGraph_2),
 			ExistingID = lists:nth(1, Buffer),
 		   
 		   %Kante hinzu fuegen
@@ -444,7 +444,8 @@ constUndirektedImport(Datei, Graph, V_ID1, V_ID2, Device, Count) ->
 			constUndirektedImport(Datei, ModifyGraph_2, V_ID1 + 2, V_ID2 + 2, Device, Count + 1);
 		   
 	   %In diesen Fall ist die V_ID1 schon vorhanden und V_ID2 noch nicht
-	   ( (BoolValVertexFirst  == true) and (BoolValVertexSecond == false)  ) -> 
+	   ( (BoolValVertexFirst  == true) and (BoolValVertexSecond == false)  ) ->
+
 		   	%Vertex an zweiter Stelle in .graph hinzu fuegen
 			ModifyGraph = graph_adt:addVertex(V_ID2, Graph),
 			
@@ -473,7 +474,7 @@ constUndirektedImport(Datei, Graph, V_ID1, V_ID2, Device, Count) ->
 			ModifyGraph_2 = graph_adt:setValV(V_ID1, name, TargetValName, ModifyGraph),
 		   
 		   	%Die schon vorhandene ID ausgraben
-			Buffer = graph_adt:getIDFromAttrValue(SourceValName, ModifyGraph_2),
+			Buffer = graph_adt:getIDFromAttrValue(TargetValName, ModifyGraph_2),
 			ExistingID = lists:nth(1, Buffer),
 		   
 		   %Kante hinzu fuegen
@@ -486,7 +487,7 @@ constUndirektedImport(Datei, Graph, V_ID1, V_ID2, Device, Count) ->
 		   constUndirektedImport(Datei, ModifyGraph_4, V_ID1 + 2, V_ID2 + 2, Device, Count + 1);
 		   
 	   %%Das ist immer der Fall, wenn beide Vertices IDs im Graphen noch nicht vorhanden sind
-	   true -> 		   		   
+	   true -> 		   		
 		   	%Verteces hinzu gefuegt
 			ModifyGraph = graph_adt:addVertex(V_ID1, Graph), 
 			
