@@ -7,10 +7,7 @@
 %% ====================================================================
 %% API functions
 %% ====================================================================
--export([new_AlGraph/0, addVertex/2, deleteVertex/2, addEdgeU/3, addEdgeD/3, deleteEdge/3,
-			isNIl/1, getAdjacent/2, getIncident/2, getVertexes/1, getValV/3,
-			getValE/3, getAttrV/2, getAttrE/2, setValE/4, setValV/4, includeValue/2,
-		 	getIDFromAttrValue/2, getEdge/3]).
+-compile(export_all).
 
 %% ====================================================================
 %% Internal functions
