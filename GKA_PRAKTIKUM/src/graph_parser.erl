@@ -8,9 +8,7 @@
 %% API functions
 %% ====================================================================
 -export([importGraph/2, readlines/1, costImport/1, costDirektedImport/6, constUndirektedImport/6,
-		  countLines/1, maxisImport/1, maxisDirektedImport/6 ]).
-
-
+		  countLines/1, maxisImport/1, maxisDirektedImport/6, maxisUndirektedImport/6]).
 
 %% ====================================================================
 %% Internal functions
@@ -73,7 +71,7 @@ maxisDirektedImport(Datei, Graph, V_ID1, V_ID2, Device, Count) ->
 	TargetValName = lists:nth(2, PartGraph),
 	CoustVal = lists:nth(3, PartGraph),
 	MaxisVal = lists:nth(4, PartGraph),
-
+	
 	%Hier kommen die Pruefungen ob die IDs in den Graphen rein duerfen TODO: Keine Ahnung ob ich das noch brauche
 	BoolValVertexFirst = graph_adt:includeValue(SourceValName, Graph),
 	BoolValVertexSecond = graph_adt:includeValue(TargetValName, Graph),
