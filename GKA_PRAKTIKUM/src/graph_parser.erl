@@ -7,8 +7,7 @@
 %% ====================================================================
 %% API functions
 %% ====================================================================
--export([importGraph/2, readlines/1, costImport/1, costDirektedImport/6, constUndirektedImport/6,
-		  countLines/1, maxisImport/1, maxisDirektedImport/6, maxisUndirektedImport/6]).
+-export([importGraph/2]).
 
 %% ====================================================================
 %% Internal functions
