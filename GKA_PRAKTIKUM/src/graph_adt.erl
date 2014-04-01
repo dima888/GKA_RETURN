@@ -1,7 +1,5 @@
 %% @author foxhound
 %% @doc @todo Add description to graph_adt.
-
-
 -module(graph_adt).
 
 %% ====================================================================
