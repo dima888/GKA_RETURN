@@ -7,16 +7,11 @@
 %% ====================================================================
 %% API functions
 %% ====================================================================
-<<<<<<< HEAD
 -export([new_AlGraph/0, addVertex/2, deleteVertex/2, addEdgeU/3, addEdgeD/3, deleteEdge/3, isNIl/1,	 getAdjacent/2, getIncident/2, getVertexes/1, getEdges/1, getValV/3, getValE/3, getAttrV/2, getAttrE/2, setValE/4, setValV/4]).
--compile(export_all).
-=======
 -export([new_AlGraph/0, addVertex/2, deleteVertex/2, addEdgeU/3, addEdgeD/3, deleteEdge/3,
 			isNIl/1, getAdjacent/2, getIncident/2, getVertexes/1, getValV/3,
 			getValE/3, getAttrV/2, getAttrE/2, setValE/4, setValV/4, includeValue/2,
 		 	getIDFromAttrValue/2, getEdge/3]).
->>>>>>> FETCH_HEAD
-
 
 %% ====================================================================
 %% Internal functions
@@ -83,9 +78,8 @@ end.
 
 %%------------------------------ SELEKTOREN -------------------------------------
 
-%% Gibt den Wert zu einem Attributnamen von einer Edge im Graphen zurück, falls nicht
-%% vorhanden wird nil zurück gegeben
-
+% Gibt den Wert zu einem Attributnamen von einer Edge im Graphen zurück, falls nicht
+% vorhanden wird nil zurück gegeben
 getValE({V_ID1, V_ID2}, Attr, Graph) ->
 	{Vertices, EdgeD, EdgeU} = Graph,
 	Edges = EdgeD ++ EdgeU,
@@ -95,9 +89,8 @@ getValE({V_ID1, V_ID2}, Attr, Graph) ->
 						true -> nil
 	end.
 
-%% Gibt den Wert zu einem Attributnamen von einem Vertex im Graphen zurück, falls nicht
-%% vorhanden, wird nil zurück gegeben
-
+% Gibt den Wert zu einem Attributnamen von einem Vertex im Graphen zurück, falls nicht
+% vorhanden, wird nil zurück gegeben
 getValV(V_ID, Attr, Graph) ->
 	{Vertices, EdgeD, EdgeU} = Graph,
 	Attribut = getAttrAndValVertex(Vertices, V_ID, []),
@@ -106,17 +99,15 @@ getValV(V_ID, Attr, Graph) ->
 						true -> nil
 	end.
 
-%% Gibt alle verfügbaren Attribute für einen Vertex (V_ID) zurück, falls keiner vorhanden
-%% wird eine leere Liste zurück gegeben.
-
+% Gibt alle verfügbaren Attribute für einen Vertex (V_ID) zurück, falls keiner vorhanden
+% wird eine leere Liste zurück gegeben.
 getAttrV(V_ID, Graph) ->
 	{Vertices, EdgeD, EdgeU} = Graph,
 	AttributsAndValues = getAttrAndValVertex(Vertices, V_ID, []),
 	Attributs = [lists:nth(1, X) || X <- AttributsAndValues].
 
-%% Gibt alle verfügbaren Attribute für eine Kante ({V_ID1, V_ID2}) zurück, falls keiner
-%% vorhanden, wird eine leere Liste zurück gegeben.
-
+% Gibt alle verfügbaren Attribute für eine Kante ({V_ID1, V_ID2}) zurück, falls keiner
+% vorhanden, wird eine leere Liste zurück gegeben.
 getAttrE({V_ID1, V_ID2}, Graph) ->
 	{Vertices, EdgeD, EdgeU} = Graph,
 	Edges = EdgeD ++ EdgeU,
@@ -125,9 +116,8 @@ getAttrE({V_ID1, V_ID2}, Graph) ->
 
 %%----------------------------------- MUTATOREN -----------------------------------------
 
-%% Setzt den Attributwert von Attr auf Val von der Kante im Graphen, wenn nicht vorhanden
-%% wird ein Attribut angelegt, sonst verändert
-
+% Setzt den Attributwert von Attr auf Val von der Kante im Graphen, wenn nicht vorhanden
+% wird ein Attribut angelegt, sonst verändert
 setValE({V_ID1, V_ID2}, Attr, Val, Graph) ->
 	{Vertices, EdgesD, EdgesU} = Graph,
 	Edges = EdgesD ++ EdgesU,
@@ -197,9 +187,8 @@ setValE({V_ID1, V_ID2}, Attr, Val, Graph) ->
 							end 
 	end.
 
-%% Setzt den Attributwert von Attr auf Val von dem Knoten im Graphen, wenn nicht vorhanden
-%% wird ein Attribut angelegt, sonst verändert 
-
+% Setzt den Attributwert von Attr auf Val von dem Knoten im Graphen, wenn nicht vorhanden
+% wird ein Attribut angelegt, sonst verändert 
 setValV(V_ID, Attr, Val, Graph) ->
 	{Vertices, EdgesD, EdgesU} = Graph,
 	
@@ -238,9 +227,8 @@ setValV(V_ID, Attr, Val, Graph) ->
 
 %%----------------------------- Hilfsmethoden ------------------------------
 
-%% Sucht nach einem passenden Attribut und gibt den Attribut Namen und Wert in einer Liste
-%% zurück, falls nichts gefunden wird, wird eine leere Liste zurück gegeben
-
+% Sucht nach einem passenden Attribut und gibt den Attribut Namen und Wert in einer Liste
+% zurück, falls nichts gefunden wird, wird eine leere Liste zurück gegeben
 getAttrAndValVertex([], V_ID, Attribut) ->
 	Attribut;
 getAttrAndValVertex([H|T], V_ID, Attribut) ->
@@ -250,7 +238,8 @@ getAttrAndValVertex([H|T], V_ID, Attribut) ->
 			  true -> getAttrAndValVertex(T, V_ID, Attribut)
 	end.
 
-
+% Gibt alle Attribute und zugehörige Values in einer verschachtelten Liste zurück, die
+% in der übergebenen Liste von Edges drin stecken 
 getAttrAndValEdge([], E_ID, Attribut) ->
 	Attribut;
 getAttrAndValEdge([H|T], E_ID, Attribut) ->
@@ -260,10 +249,12 @@ getAttrAndValEdge([H|T], E_ID, Attribut) ->
 			  true -> getAttrAndValEdge(T, E_ID, Attribut)
 	end.
 
+% Gibt den Typ der Edges in der übergebenen Liste zurück (Liste muss aus gleich typigen Edges bestehen)
 getEdgeType(EdgesInList) ->
 	Edge = lists:nth(1, EdgesInList), 
 	lists:nth(1, Edge).
 
+% Gibt die passende Edge zu der übergebenen ID aus einer Liste von Edges zurück, Edgetyp = edgeD oder edgeU
 getEdge(EdgesInList, {V_ID1, V_ID2}, EdgeType) ->
 	if
 		EdgeType == edgeD -> E = [X || X <- EdgesInList, lists:nth(2, X) == {V_ID1, V_ID2}], lists:nth(1, E);
@@ -405,6 +396,7 @@ getEdges(Graph) ->
 %Graph = {[[vertex,1],[vertex,2],[vertex,3]], [[edgeD,{1,2}],[edgeD,{1,3}]], [[edgeU,{1,3}]]}.
 
 %---------- HILFSMETHODEN -----------
+% Gibt ein Boolean zurück => True, wenn der übergebene Val im graphen existiert, sonst false
 includeValue(Val, Graph) ->
 	{Vertices, EdgeD, EdgeU} = Graph,
 	Attributs = getAttrAndValVertex(Vertices, []),
@@ -415,6 +407,8 @@ includeValue(Val, Graph) ->
 			   true -> true
 	end.
 
+% Gibt alle Attribute und zugehörige Values in einer verschachtelten Liste zurück, die
+% in der übergebenen Liste von Vertices drin stecken
 getAttrAndValVertex([], Attribut) ->
 	Attribut;
 getAttrAndValVertex([H|T],  Attribut) ->
