@@ -71,12 +71,7 @@ maxisDirektedImport(Datei, Graph, V_ID1, V_ID2, Device, Count) ->
 	TargetValName = lists:nth(2, PartGraph),
 	CoustVal = lists:nth(3, PartGraph),
 	MaxisVal = lists:nth(4, PartGraph),
-	
-<<<<<<< HEAD
-	io:write("Term"),
 
-=======
->>>>>>> fdb724922b1393ffe7b0770d1b6e6afa8a5e095f
 	%Hier kommen die Pruefungen ob die IDs in den Graphen rein duerfen TODO: Keine Ahnung ob ich das noch brauche
 	BoolValVertexFirst = graph_adt:includeValue(SourceValName, Graph),
 	BoolValVertexSecond = graph_adt:includeValue(TargetValName, Graph),
