@@ -74,12 +74,8 @@ setValE({V_ID1, V_ID2}, Attr, Val, Graph) ->
 					
 					true -> EdgeType = getEdgeType(EdgeInList),
 							Edge = getEdge(EdgeInList, {V_ID1, V_ID2}, EdgeType),
-						
-%% 							%Edge aus der Edgelist extrahieren
-%% 							[Edge] = EdgeInList,
-%% 							
-%% 							%Edgetyp extrahieren
-%% 							EdgeType = lists:nth(1, Edge),
+							
+							%io:fwrite("Edge: "), io:write(Edge), io:fwrite(" EdgeType: "), io:write(EdgeType),
 						
 							%Prüfen um welche Edgeart es sich handelt, da unterschiedliches verhalten
 							if
@@ -203,8 +199,8 @@ getEdgeType(EdgesInList) ->
 
 getEdge(EdgesInList, {V_ID1, V_ID2}, EdgeType) ->
 	if
-		EdgeType == edgeD -> [X || X <- EdgesInList, lists:nth(2, X) == {V_ID1, V_ID2}];
-		EdgeType == edgeU -> [X || X <- EdgesInList, (lists:nth(2, X) == {V_ID1, V_ID2}) or (lists:nth(2, X) == {V_ID2, V_ID1})];
+		EdgeType == edgeD -> E = [X || X <- EdgesInList, lists:nth(2, X) == {V_ID1, V_ID2}], lists:nth(1, E);
+		EdgeType == edgeU -> E = [X || X <- EdgesInList, (lists:nth(2, X) == {V_ID1, V_ID2}) or (lists:nth(2, X) == {V_ID2, V_ID1})], lists:nth(1, E);
 					 true -> io:fwrite("ES DARF NUR edgeD oder edgeU als FORMAT ANGEGEBEN WERDEN")
 	end.
 
@@ -225,11 +221,14 @@ getEdge(EdgesInList, {V_ID1, V_ID2}, EdgeType) ->
 % hilfeMethoden:getAttrE({1,2}, {[],[[edgeD, {1,2}, [alter, 22], [name, hamburg]]],[[edgeU, {1,2}, [strasse, kroonhorst]]]}).
 
 %%*** setValE ***
-% hilfeMethoden:setValE({1,2}, alter, 20, {[],[[edgeD, {1,2}], [edgeD, {2,1}]],[]}).
-% hilfeMethoden:setValE({1,2}, alter, 20, {[],[[edgeD, {1,2}, [name, hamburg]]],[]}).
+% hilfeMethoden:setValE({1,2}, menu, "Big Mac", {[], [ [edgeD, {1,2}] ], []}).
+% hilfeMethoden:setValE({1,2}, alter, 20, {[],[ [edgeD, {1,2}], [edgeD, {2,1}] ],[]}).
+% hilfeMethoden:setValE({1,2}, alter, 20, {[],[ [edgeD, {1,2}, [name, hamburg] ] ],[]}).
 % hilfeMethoden:setValE({1,2}, alter, 20, {[],[[edgeD, {1,2}, [alter, 25], [name, hamburg]]],[]}).
-% hilfeMethoden:setValE({4,5}, alter, 30, {[],[[edgeD, {1,2}, [alter, 25], [name, hamburg]], [edgeD, {4,5}, [alter, 18]]],[]}).
+% hilfeMethoden:setValE({4,5}, alter, 30, {[],[ [edgeD, {1,2}, [alter, 25], [name, hamburg] ], [edgeD, {4,5}, [alter, 18] ] ],[[edgeU, {7,9}]]}).							
 % hilfeMethoden:setValE({4,5}, alter, 30, {[], [], [[edgeU, {1,2}, [alter, 25], [name, hamburg]], [edgeU, {4,5}, [alter, 18]]]}).
+% Graph = {[[vertex,1],[vertex,2],[vertex,3]], [ [edgeD,{1,2}],[edgeD,{1,3}] ], [[edgeU,{1,3}]]}.
+
 
 %*** setValV ***
 % hilfeMethoden:setValV(1, alter, 20, {[[vertex, 1]],[],[]}).
@@ -237,5 +236,7 @@ getEdge(EdgesInList, {V_ID1, V_ID2}, EdgeType) ->
 % hilfeMethoden:setValV(1, alter, 20, {[[vertex, 1, [alter, 25]]],[],[]}).
 % hilfeMethoden:setValV(1, alter, 20, {[[vertex, 1, [alter, 25], [name, hamburg]]],[],[]}).
 % hilfeMethoden:setValV(1, alter, 20, {[[vertex, 1, [alter, 25], [name, hamburg]], [vertex, 2, [alter, 6], [farbe, blau]]],[],[]}).
+
+%Graph = {[[vertex,1],[vertex,2],[vertex,3]], [[edgeD,{1,2}],[edgeD,{1,3}]], [[edgeU,{1,3}]]}.
 
 %%cd("/Users/Flah/Dropbox/WorkSpace/GKA_RETURN/GKA_PRAKTIKUM/src").

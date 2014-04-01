@@ -533,6 +533,3 @@ countLines(File) ->
 	Z = [ [X] || X <- Line],
 	Res = [ X || X <- Z, X == "\n"],
 	L = length(Res) + 1 .
-	
-	
-	
