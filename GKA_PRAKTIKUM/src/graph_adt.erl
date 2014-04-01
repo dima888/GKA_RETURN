@@ -7,14 +7,7 @@
 %% ====================================================================
 %% API functions
 %% ====================================================================
-<<<<<<< HEAD
 -export([new_AlGraph/0, addVertex/2, deleteVertex/2, addEdgeU/3, addEdgeD/3, deleteEdge/3, isNIl/1,	 getAdjacent/2, getIncident/2, getVertexes/1, getEdges/1, getValV/3, getValE/3, getAttrV/2, getAttrE/2, setValE/4, setValV/4]).
-=======
--export([new_AlGraph/0, addVertex/2, deleteVertex/2, addEdgeU/3, addEdgeD/3, deleteEdge/3, isNIl/1,
-		 getAdjacent/2, getIncident/2, getVertexes/1, getEdges/1, includeValue/2, getAttrAndValVertex/2,
-		  getAttrE/2, getAttrV/2, getValE/3, getValV/3, getIDFromAttrValue/2, setValV/4, setValE/4 ]).
->>>>>>> FETCH_HEAD
-
 
 
 %% ====================================================================
@@ -138,11 +131,8 @@ setValE({V_ID1, V_ID2}, Attr, Val, Graph) ->
 		%Prüfen ob überhaupt eine Edge mit der übergebenen ID im Graphen existiert
 		EdgeInList == [] -> nil;
 					
-					true -> %Edge aus der Edgelist extrahieren
-							[Edge] = EdgeInList,
-							
-							%Edgetyp extrahieren
-							EdgeType = lists:nth(1, Edge),
+					true -> EdgeType = getEdgeType(EdgeInList),
+							Edge = getEdge(EdgeInList, {V_ID1, V_ID2}, EdgeType),
 						
 							%Prüfen um welche Edgeart es sich handelt, da unterschiedliches verhalten
 							if
@@ -260,6 +250,17 @@ getAttrAndValEdge([H|T], E_ID, Attribut) ->
 			  true -> getAttrAndValEdge(T, E_ID, Attribut)
 	end.
 
+getEdgeType(EdgesInList) ->
+	Edge = lists:nth(1, EdgesInList), 
+	lists:nth(1, Edge).
+
+getEdge(EdgesInList, {V_ID1, V_ID2}, EdgeType) ->
+	if
+		EdgeType == edgeD -> [X || X <- EdgesInList, lists:nth(2, X) == {V_ID1, V_ID2}];
+		EdgeType == edgeU -> [X || X <- EdgesInList, (lists:nth(2, X) == {V_ID1, V_ID2}) or (lists:nth(2, X) == {V_ID2, V_ID1})];
+					 true -> io:fwrite("ES DARF NUR edgeD oder edgeU als FORMAT ANGEGEBEN WERDEN")
+	end.
+
 %%------------------------------------ TESTS ------------------------------------------
 
 %%*** getValE ***
@@ -277,7 +278,7 @@ getAttrAndValEdge([H|T], E_ID, Attribut) ->
 % hilfeMethoden:getAttrE({1,2}, {[],[[edgeD, {1,2}, [alter, 22], [name, hamburg]]],[[edgeU, {1,2}, [strasse, kroonhorst]]]}).
 
 %%*** setValE ***
-% hilfeMethoden:setValE({1,2}, alter, 20, {[],[[edgeD, {1,2}]],[]}).
+% hilfeMethoden:setValE({1,2}, alter, 20, {[],[[edgeD, {1,2}], [edgeD, {2,1}]],[]}).
 % hilfeMethoden:setValE({1,2}, alter, 20, {[],[[edgeD, {1,2}, [name, hamburg]]],[]}).
 % hilfeMethoden:setValE({1,2}, alter, 20, {[],[[edgeD, {1,2}, [alter, 25], [name, hamburg]]],[]}).
 % hilfeMethoden:setValE({4,5}, alter, 30, {[],[[edgeD, {1,2}, [alter, 25], [name, hamburg]], [edgeD, {4,5}, [alter, 18]]],[]}).
@@ -416,5 +417,3 @@ getIDFromAttrValue(Val, Graph) ->
 		   nil;
 	   true -> ID = [ lists:nth(2, X) || X <- Vertices, graph_adt:getValV(lists:nth(2, X), Val, Graph) == lists:nth(1, Value) ]
 	end.
-
-
