@@ -7,7 +7,13 @@
 %% ====================================================================
 %% API functions
 %% ====================================================================
+<<<<<<< HEAD
 -export([new_AlGraph/0, addVertex/2, deleteVertex/2, addEdgeU/3, addEdgeD/3, deleteEdge/3, isNIl/1,	 getAdjacent/2, getIncident/2, getVertexes/1, getEdges/1, getValV/3, getValE/3, getAttrV/2, getAttrE/2, setValE/4, setValV/4]).
+=======
+-export([new_AlGraph/0, addVertex/2, deleteVertex/2, addEdgeU/3, addEdgeD/3, deleteEdge/3, isNIl/1,
+		 getAdjacent/2, getIncident/2, getVertexes/1, getEdges/1, includeValue/2, getAttrAndValVertex/2,
+		  getAttrE/2, getAttrV/2, getValE/3, getValV/3, getIDFromAttrValue/2, setValV/4, setValE/4 ]).
+>>>>>>> FETCH_HEAD
 
 
 
@@ -397,3 +403,18 @@ getAttrAndValVertex([], Attribut) ->
 	Attribut;
 getAttrAndValVertex([H|T],  Attribut) ->
 	getAttrAndValVertex(T, Attribut ++ [[X,Y] || [X,Y] <- H]).
+
+%TODO: Verstehe nicht genau, warum das mit Val in graph_adt:getValV(lists:nth(2, X), Val, Graph) funktioniert, eigentlich sollte da name stehen
+%Test Graph fuer getIDFromAttrValue
+%%Graph = {[[vertex,1, [name, "s"] ] ,[vertex,2, [name, "u"] ],[vertex,3, [name, "v"] ]], [[edgeD,{1,2}],[edgeD,{1,3}]], [[edgeU,{1,3}]]}.
+getIDFromAttrValue(Val, Graph) -> 
+	{Vertices, EdgeD, EdgeU} = Graph,
+	Attributs = getAttrAndValVertex(Vertices, []),
+	Value = [ lists:nth(2, X) || X <- Attributs, lists:nth(2, X) == Val],
+	
+	if length(Value) == 0 -> 
+		   nil;
+	   true -> ID = [ lists:nth(2, X) || X <- Vertices, graph_adt:getValV(lists:nth(2, X), Val, Graph) == lists:nth(1, Value) ]
+	end.
+
+
