@@ -6,11 +6,8 @@
 %% API functions
 %% ====================================================================
 -compile(export_all).
-<<<<<<< HEAD
-=======
 
 %graph_parser:importGraph("//Users//Flah//Desktop//test.graph", "cost").
->>>>>>> ece8d79bbd9fb305b8975fc999e4661f780bb42b
 
 %% ====================================================================
 %% Internal functions
@@ -533,4 +530,4 @@ countLines(File) ->
 %"C:\\Users\\foxhound\\Desktop\\test.txt"
 	Z = [ [X] || X <- Line],
 	Res = [ X || X <- Z, X == "\n"],
-	L = length(Res) + 1 .
+	length(Res) + 1 .
