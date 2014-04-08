@@ -91,8 +91,8 @@ maxisDirektedImport(Datei, Graph, V_ID1, V_ID2, Device, Count) ->
 			ModifyGraph = graph_adt:addEdgeD(ExistingID_1, ExistingID_2, Graph),
 			
 			%Attribut an die Kante kleben
-			ModifyGraph_2 = graph_adt:setValE({ExistingID_1, ExistingID_2}, cost, CoustVal, ModifyGraph),
-			ModifyGraph_3 = graph_adt:setValE({ExistingID_1, ExistingID_2}, maxis, MaxisVal, ModifyGraph_2),
+			%ModifyGraph_2 = graph_adt:setValE({ExistingID_1, ExistingID_2}, cost, CoustVal, ModifyGraph),
+			ModifyGraph_3 = graph_adt:setValE({ExistingID_1, ExistingID_2}, maxis, {CoustVal, MaxisVal}, ModifyGraph),
 			
 			%Zurueck in die Rekursion
 			maxisDirektedImport(Datei, ModifyGraph_3, V_ID1 + 2, V_ID2 + 2, Device, Count + 1);
@@ -113,8 +113,8 @@ maxisDirektedImport(Datei, Graph, V_ID1, V_ID2, Device, Count) ->
 			ModifyGraph_3 = graph_adt:addEdgeD(ExistingID, V_ID2, ModifyGraph_2),
 			
 			%Attribut an die Kante kleben
-			ModifyGraph_4 = graph_adt:setValE({ExistingID, V_ID2}, cost, CoustVal, ModifyGraph_3),
-			ModifyGraph_5 = graph_adt:setValE({ExistingID, V_ID2}, maxis, MaxisVal, ModifyGraph_4),
+			%ModifyGraph_4 = graph_adt:setValE({ExistingID, V_ID2}, cost, CoustVal, ModifyGraph_3),
+			ModifyGraph_5 = graph_adt:setValE({ExistingID, V_ID2}, maxis, {CoustVal, MaxisVal}, ModifyGraph_3),
 			
 			%Zurueck in die Rekursion
 			maxisDirektedImport(Datei, ModifyGraph_5, V_ID1 + 2, V_ID2 + 2, Device, Count + 1);
@@ -135,8 +135,8 @@ maxisDirektedImport(Datei, Graph, V_ID1, V_ID2, Device, Count) ->
 			ModifyGraph_3 = graph_adt:addEdgeD(V_ID1, ExistingID, ModifyGraph_2),
 		   
 		   	%Attribut an die Kante kleben
-			ModifyGraph_4 = graph_adt:setValE({V_ID1, ExistingID}, cost, CoustVal, ModifyGraph_3),
-		    ModifyGraph_5 = graph_adt:setValE({V_ID1, ExistingID}, maxis, MaxisVal, ModifyGraph_4),
+			%ModifyGraph_4 = graph_adt:setValE({V_ID1, ExistingID}, cost, CoustVal, ModifyGraph_3),
+		    ModifyGraph_5 = graph_adt:setValE({V_ID1, ExistingID}, maxis, {CoustVal, MaxisVal}, ModifyGraph_3),
 		   
 		   %Zurueck in die Rekursion
 		   maxisDirektedImport(Datei, ModifyGraph_5, V_ID1 + 2, V_ID2 + 2, Device, Count + 1);
@@ -159,8 +159,8 @@ maxisDirektedImport(Datei, Graph, V_ID1, V_ID2, Device, Count) ->
 			ModifyGraph_5 = graph_adt:addEdgeD(V_ID1, V_ID2, ModifyGraph_4),
 			
 			%Attribut an die Kante kleben
-			ModifyGraph_6 = graph_adt:setValE({V_ID1, V_ID2}, cost, CoustVal, ModifyGraph_5),
-			ModifyGraph_7 = graph_adt:setValE({V_ID1, V_ID2}, maxis, MaxisVal, ModifyGraph_6),
+			%ModifyGraph_6 = graph_adt:setValE({V_ID1, V_ID2}, cost, CoustVal, ModifyGraph_5),
+			ModifyGraph_7 = graph_adt:setValE({V_ID1, V_ID2}, maxis, {CoustVal, MaxisVal}, ModifyGraph_5),
 	
 			%Zurueck in die Rekursion
 			maxisDirektedImport(Datei, ModifyGraph_7, V_ID1 + 2, V_ID2 + 2, Device, Count + 1)
@@ -208,8 +208,8 @@ maxisUndirektedImport(Datei, Graph, V_ID1, V_ID2, Device, Count) ->
 			ModifyGraph = graph_adt:addEdgeU(ExistingID_1, ExistingID_2, Graph),
 			
 			%Attribut an die Kante kleben
-			ModifyGraph_2 = graph_adt:setValE({ExistingID_1, ExistingID_2}, cost, CoustVal, ModifyGraph),
-			ModifyGraph_3 = graph_adt:setValE({ExistingID_1, ExistingID_2}, maxis, MaxisVal, ModifyGraph_2),
+			%ModifyGraph_2 = graph_adt:setValE({ExistingID_1, ExistingID_2}, cost, CoustVal, ModifyGraph),
+			ModifyGraph_3 = graph_adt:setValE({ExistingID_1, ExistingID_2}, maxis, {CoustVal, MaxisVal}, ModifyGraph),
 			
 			%Zurueck in die Rekursion
 			maxisUndirektedImport(Datei, ModifyGraph_3, V_ID1 + 2, V_ID2 + 2, Device, Count + 1);
@@ -230,8 +230,8 @@ maxisUndirektedImport(Datei, Graph, V_ID1, V_ID2, Device, Count) ->
 			ModifyGraph_3 = graph_adt:addEdgeU(ExistingID, V_ID2, ModifyGraph_2),
 			
 			%Attribut an die Kante kleben
-			ModifyGraph_4 = graph_adt:setValE({ExistingID, V_ID2}, cost, CoustVal, ModifyGraph_3),
-			ModifyGraph_5 = graph_adt:setValE({ExistingID, V_ID2}, maxis, MaxisVal, ModifyGraph_4),
+			%ModifyGraph_4 = graph_adt:setValE({ExistingID, V_ID2}, cost, CoustVal, ModifyGraph_3),
+			ModifyGraph_5 = graph_adt:setValE({ExistingID, V_ID2}, maxis, {CoustVal, MaxisVal}, ModifyGraph_3),
 			
 			%Zurueck in die Rekursion
 			maxisUndirektedImport(Datei, ModifyGraph_5, V_ID1 + 2, V_ID2 + 2, Device, Count + 1);
@@ -252,8 +252,8 @@ maxisUndirektedImport(Datei, Graph, V_ID1, V_ID2, Device, Count) ->
 			ModifyGraph_3 = graph_adt:addEdgeU(V_ID1, ExistingID, ModifyGraph_2),
 		   
 		   	%Attribut an die Kante kleben
-			ModifyGraph_4 = graph_adt:setValE({V_ID1, ExistingID}, cost, CoustVal, ModifyGraph_3),
-		    ModifyGraph_5 = graph_adt:setValE({V_ID1, ExistingID}, maxis, MaxisVal, ModifyGraph_4),
+			%ModifyGraph_4 = graph_adt:setValE({V_ID1, ExistingID}, cost, CoustVal, ModifyGraph_3),
+		    ModifyGraph_5 = graph_adt:setValE({V_ID1, ExistingID}, maxis, {CoustVal, MaxisVal}, ModifyGraph_3),
 		   
 		   %Zurueck in die Rekursion
 		   maxisUndirektedImport(Datei, ModifyGraph_5, V_ID1 + 2, V_ID2 + 2, Device, Count + 1);
@@ -277,7 +277,7 @@ maxisUndirektedImport(Datei, Graph, V_ID1, V_ID2, Device, Count) ->
 			
 			%Attribut an die Kante kleben
 			ModifyGraph_6 = graph_adt:setValE({V_ID1, V_ID2}, cost, CoustVal, ModifyGraph_5),
-			ModifyGraph_7 = graph_adt:setValE({V_ID1, V_ID2}, maxis, MaxisVal, ModifyGraph_6),
+			ModifyGraph_7 = graph_adt:setValE({V_ID1, V_ID2}, maxis, {CoustVal, MaxisVal}, ModifyGraph_6),
 	
 			%Zurueck in die Rekursion
 			maxisUndirektedImport(Datei, ModifyGraph_7, V_ID1 + 2, V_ID2 + 2, Device, Count + 1)
