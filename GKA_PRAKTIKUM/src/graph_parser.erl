@@ -79,7 +79,7 @@ maxisDirektedImport(Datei, Graph, V_ID1, V_ID2, Device, Count) ->
 		   %TODO: Lesen und beraten, gegebenfalls in der Vorlesung ansprechen ob wir diesen Fall wirklich benoetigen
 		   %in diesen Fall packt er ein und die gleiche Kante doppeln rein. Deshalb behandele ich diesen Fall erstmal nicht!
 	
-		   %Die schon vorhandene ID ausgraben
+		   %Die schon vorhandene ID ausgraben	
 			Buffer = graph_adt:getIDFromAttrValue(SourceValName, Graph),
 			ExistingID_1 = lists:nth(1, Buffer),
 		   

@@ -24,7 +24,7 @@ new_AlGraph() ->
 addVertex(NewItem, Graph) ->
 	{ Vertices, EdgesD, EdgesU } = Graph,
 %----------------- Precondition -------------------- 
-BoolValue = lists:member(NewItem, Vertices), %Wert muss zwischen gespeichert werden, zum kotzen!
+BoolValue = lists:member(NewItem, Vertices), 
 VertexList = [ lists:nth(2, X) || X <- Vertices],
 BoolDoubleVertex = lists:member(NewItem, VertexList),
 	
