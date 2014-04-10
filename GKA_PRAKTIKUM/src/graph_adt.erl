@@ -74,6 +74,7 @@ end.
 
 % Gibt den Wert zu einem Attributnamen von einer Edge im Graphen zurück, falls nicht
 % vorhanden wird nil zurück gegeben
+%Exmple: getValE({V_ID1, V_ID2}, Attr, Graph)
 getValE({V_ID1, V_ID2}, Attr, Graph) ->
 	{Vertices, EdgeD, EdgeU} = Graph,
 	Edges = EdgeD ++ EdgeU,
@@ -83,6 +84,7 @@ getValE({V_ID1, V_ID2}, Attr, Graph) ->
 						true -> nil
 	end.
 
+%TODO: Bitte diese Methode ueberarbeiten, sie funktioniert nicht richtig
 % Gibt den Wert zu einem Attributnamen von einem Vertex im Graphen zurück, falls nicht
 % vorhanden, wird nil zurück gegeben
 getValV(V_ID, Attr, Graph) ->

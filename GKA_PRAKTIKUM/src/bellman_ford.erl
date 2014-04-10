@@ -1,5 +1,7 @@
 %% @author foxhound
 %% @doc @todo Add description to 'Bellman_Ford'.
+%09.04.14 -> 3std
+%10.04.14 -> 3std
 
 %Quelle: http://de.wikipedia.org/wiki/Bellman-Ford-Algorithmus
 %Quelle: http://fuzzy.cs.uni-magdeburg.de/studium/graph/txt/duvigneau.pdf
@@ -7,7 +9,7 @@
 %02      Distanz(v) := unendlich, Vorgänger(v) := keiner
 %03  Distanz(s) := 0
 
-%04  wiederhole n - 1 mal               
+%04  wiederhole n - 1 mal /Wobei n Anzahl der Knoten und m Anzahl der Kanten im Graphen ist          
 %05      für jedes (u,v) aus E
 %06          wenn Distanz(u) + Gewicht(u,v) < Distanz(v)
 %07          dann
@@ -54,6 +56,9 @@ initialize(Graph, SourceID, VerticesIDList, Count) ->
 	true -> 
 		   initialize(graph_adt:setValV(CurrentVertexID, distance, 576460752303423488, ModifyGraph), SourceID, lists:delete(CurrentVertexID, VerticesIDList), Count)
 	end.
+
+
+%Graph = graph_parser:importGraph("c:\\users\\foxhound\\desktop\\bellman.txt", "cost"). 
 %04  wiederhole n - 1 mal               
 %05      für jedes (u,v) aus E
 %06          wenn Distanz(u) + Gewicht(u,v) < Distanz(v)
@@ -62,13 +67,45 @@ initialize(Graph, SourceID, VerticesIDList, Count) ->
 %09              Vorgänger(v) := u
 algoStepTwo(Graph, Count) -> 
 	{ Vertices, EdgesD, EdgesU } = Graph,
-	Edge = lists:nth(1, EdgesD),
+	
+	EdgeSize = erlang:length(EdgesU)+1, % + 1, weil index nicht bei null beginnt, sondern bei 1
+	
+	if (Count == EdgeSize) -> 
+		   fertig; %Hier muss das n erhoeht werden, bis n-1 //Schritt 4
+	   true -> 
+			Edge = lists:nth(Count, EdgesU),
+			%Hier hollen wir uns jetzt u und v und pruefen //Schritt 5
+			
+			%u VertexID hollen
+			UvertexID = erlang:element(1, lists:nth(2, Edge)),
+			
+			%Von u die Distance hollen
+			%Udistance = graph_adt:getValV(UvertexID, distance, Graph), %getValV funktioniert nicht!
+			
+
+			%v VertexID hollen
+			VvertexID = erlang:element(2, lists:nth(2, Edge)),
+			
+			%Von v die Distance hollen
+			%Vdistance = graph_adt:getValV(VvertexID, distance, Graph), %funktioniert nicht!
+
+			%Gewicht der Kante(u, v) hollen
+			Cost_u_v_inStringList = graph_adt:getValE({UvertexID, VvertexID}, cost, Graph),
+			Cost_u_v = erlang:list_to_integer(Cost_u_v_inStringList),
+	
+			%wenn Distanz(u) + Gewicht(u,v) < Distanz(v)
+
+			
+			%Testbox return, damit ich schlafen gehen kann
+			[Cost_u_v]
+	end.
+
 	%VvertexID_2 = erlang:element(2, lists:nth(2, EdgesD)),
-	X = 4.
 	
 
-
-
+%Graph = graph_parser:importGraph("c:\\users\\foxhound\\desktop\\bellman.txt", "cost"). 
+%L = bellman_ford:initialize(Graph, 1).
+%bellman_ford:algoStepTwo(L, 1).
 
 
 
