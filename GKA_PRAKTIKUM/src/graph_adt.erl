@@ -418,5 +418,23 @@ getIDFromAttrValue(Val, Graph) ->
 	
 	if length(Value) == 0 -> 
 		   nil;
-	   true -> ID = [ lists:nth(2, X) || X <- Vertices, graph_adt:getValV(lists:nth(2, X), Val, Graph) == lists:nth(1, Value) ]
+	   true -> ID = [ lists:nth(2, X) || X <- Vertices, graph_adt:getValV(lists:nth(2, X), name, Graph) == lists:nth(1, Value) ]
 	end.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
