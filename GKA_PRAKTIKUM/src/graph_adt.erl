@@ -80,18 +80,17 @@ getValE({V_ID1, V_ID2}, Attr, Graph) ->
 	Edges = EdgeD ++ EdgeU,
 	Attribut = getAttrAndValEdge(Edges, {V_ID1, V_ID2}, []),
 	if
-		not (Attribut == []) -> ([A] = Attribut), ([K,V] = A), V;
+		not (Attribut == []) -> Erg = [lists:nth(2, X) || X <- Attribut, lists:nth(1, X) == Attr], lists:nth(1, Erg);
 						true -> nil
 	end.
 
-%TODO: Bitte diese Methode ueberarbeiten, sie funktioniert nicht richtig
 % Gibt den Wert zu einem Attributnamen von einem Vertex im Graphen zurück, falls nicht
 % vorhanden, wird nil zurück gegeben
 getValV(V_ID, Attr, Graph) ->
 	{Vertices, EdgeD, EdgeU} = Graph,
 	Attribut = getAttrAndValVertex(Vertices, V_ID, []),
 	if
-		not (Attribut == []) -> ([A] = Attribut), ([K,V] = A), V;
+		not (Attribut == []) -> Erg = [lists:nth(2, X) || X <- Attribut, lists:nth(1, X) == Attr], lists:nth(1, Erg);
 						true -> nil
 	end.
 
@@ -261,35 +260,34 @@ getEdge(EdgesInList, {V_ID1, V_ID2}, EdgeType) ->
 %%------------------------------------ TESTS ------------------------------------------
 
 %%*** getValE ***
-% hilfeMethoden:getValE({1,2}, alter, {[],[[edgeD, {1,2}, [alter, 22]]],[]}).
-% hilfeMethoden:getValE({1,2}, alter, {[],[[edgeD, {1,2}, [alter, 22]]],[[edgeU, {1,2}, [alter, 20]]]}).
+% graph_adt:getValE({1,2}, alter, {[],[[edgeD, {1,2}, [alter, 22], [name, "Flah"], [wohnort, "Hamburg"]]],[]}).
 
 %%*** getValV ***
-% hilfeMethoden:getValV(1, alter, {[[vertex, 2, [alter, 22]], [vertex, 1, [alter, 20]]],[],[]}).
+% graph_adt:getValV(1, alter, {[[vertex, 2, [alter, 22], [name, "Flah"], [wohnort, "Hamburg"]], [vertex, 1, [alter, 20]]],[],[]}).
 
 %%*** getAttrV ***
-% hilfeMethoden:getAttrV(1, {[[vertex, 1, [alter, 20], [b, 4], [name, hamburg]]],[],[]}).
+% graph_adt:getAttrV(1, {[[vertex, 1, [alter, 20], [b, 4], [name, hamburg]]],[],[]}).
 
 %%*** getAttrE ***
-% hilfeMethoden:getAttrE({1,2}, {[],[[edgeD, {1,2}, [alter, 22], [name, hamburg]]],[]}). 
-% hilfeMethoden:getAttrE({1,2}, {[],[[edgeD, {1,2}, [alter, 22], [name, hamburg]]],[[edgeU, {1,2}, [strasse, kroonhorst]]]}).
+% graph_adt:getAttrE({1,2}, {[],[[edgeD, {1,2}, [alter, 22], [name, hamburg]]],[]}). 
+% graph_adt:getAttrE({1,2}, {[],[[edgeD, {1,2}, [alter, 22], [name, hamburg]]],[[edgeU, {1,2}, [strasse, kroonhorst]]]}).
 
 %%*** setValE ***
-% hilfeMethoden:setValE({1,2}, menu, "Big Mac", {[], [ [edgeD, {1,2}] ], []}).
-% hilfeMethoden:setValE({1,2}, alter, 20, {[],[ [edgeD, {1,2}], [edgeD, {2,1}] ],[]}).
-% hilfeMethoden:setValE({1,2}, alter, 20, {[],[ [edgeD, {1,2}, [name, hamburg] ] ],[]}).
-% hilfeMethoden:setValE({1,2}, alter, 20, {[],[[edgeD, {1,2}, [alter, 25], [name, hamburg]]],[]}).
-% hilfeMethoden:setValE({4,5}, alter, 30, {[],[ [edgeD, {1,2}, [alter, 25], [name, hamburg] ], [edgeD, {4,5}, [alter, 18] ] ],[[edgeU, {7,9}]]}).							
-% hilfeMethoden:setValE({4,5}, alter, 30, {[], [], [[edgeU, {1,2}, [alter, 25], [name, hamburg]], [edgeU, {4,5}, [alter, 18]]]}).
+% graph_adt:setValE({1,2}, menu, "Big Mac", {[], [ [edgeD, {1,2}] ], []}).
+% graph_adt:setValE({1,2}, alter, 20, {[],[ [edgeD, {1,2}], [edgeD, {2,1}] ],[]}).
+% graph_adt:setValE({1,2}, alter, 20, {[],[ [edgeD, {1,2}, [name, hamburg] ] ],[]}).
+% graph_adt:setValE({1,2}, alter, 20, {[],[[edgeD, {1,2}, [alter, 25], [name, hamburg]]],[]}).
+% graph_adt:setValE({4,5}, alter, 30, {[],[ [edgeD, {1,2}, [alter, 25], [name, hamburg] ], [edgeD, {4,5}, [alter, 18] ] ],[[edgeU, {7,9}]]}).							
+% graph_adt:setValE({4,5}, alter, 30, {[], [], [[edgeU, {1,2}, [alter, 25], [name, hamburg]], [edgeU, {4,5}, [alter, 18]]]}).
 % Graph = {[[vertex,1],[vertex,2],[vertex,3]], [ [edgeD,{1,2}],[edgeD,{1,3}] ], [[edgeU,{1,3}]]}.
 
 
 %*** setValV ***
-% hilfeMethoden:setValV(1, alter, 20, {[[vertex, 1]],[],[]}).
-% hilfeMethoden:setValV(1, alter, 20, {[[vertex, 1, [name, hamburg]]],[],[]}).
-% hilfeMethoden:setValV(1, alter, 20, {[[vertex, 1, [alter, 25]]],[],[]}).
-% hilfeMethoden:setValV(1, alter, 20, {[[vertex, 1, [alter, 25], [name, hamburg]]],[],[]}).
-% hilfeMethoden:setValV(1, alter, 20, {[[vertex, 1, [alter, 25], [name, hamburg]], [vertex, 2, [alter, 6], [farbe, blau]]],[],[]}).
+% graph_adt:setValV(1, alter, 20, {[[vertex, 1]],[],[]}).
+% graph_adt:setValV(1, alter, 20, {[[vertex, 1, [name, hamburg]]],[],[]}).
+% graph_adt:setValV(1, alter, 20, {[[vertex, 1, [alter, 25]]],[],[]}).
+% graph_adt:setValV(1, alter, 20, {[[vertex, 1, [alter, 25], [name, hamburg]]],[],[]}).
+% graph_adt:setValV(1, alter, 20, {[[vertex, 1, [alter, 25], [name, hamburg]], [vertex, 2, [alter, 6], [farbe, blau]]],[],[]}).
 
 %Graph = {[[vertex,1],[vertex,2],[vertex,3]], [[edgeD,{1,2}],[edgeD,{1,3}]], [[edgeU,{1,3}]]}.
 
