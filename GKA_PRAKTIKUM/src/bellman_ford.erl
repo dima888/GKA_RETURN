@@ -2,6 +2,7 @@
 %% @doc @todo Add description to 'Bellman_Ford'.
 %09.04.14 -> 3std
 %10.04.14 -> 3std
+%13.04.14 -> 3std
 
 %Quelle: http://de.wikipedia.org/wiki/Bellman-Ford-Algorithmus
 %Quelle: http://fuzzy.cs.uni-magdeburg.de/studium/graph/txt/duvigneau.pdf
@@ -65,15 +66,16 @@ initialize(Graph, SourceID, VerticesIDList, Count) ->
 %07          dann
 %08              Distanz(v) := Distanz(u) + Gewicht(u,v)
 %09              Vorgänger(v) := u
-algoStepTwo(Graph, Count, OverCount) -> 
+algoStepTwoU(Graph, Count, OverCount) -> 
 	{ Vertices, EdgesD, EdgesU } = Graph,
-	
+	%TODO: Hier bei ungerichtet, muss noch in die andere Richtung geschaut werden, bis jetzt wird nur in eine Richtung geguckt!
 	EdgeSize = erlang:length(EdgesU), % + 1, weil index nicht bei null beginnt, sondern bei 1
 
 	if (Count == EdgeSize + 1) -> 
-			overAlgoStepTwo(Graph, OverCount + 1);
+			overAlgoStepTwoU(Graph, OverCount + 1);
 	   true -> 
 			Edge = lists:nth(Count, EdgesU),
+			
 			%Hier hollen wir uns jetzt u und v und pruefen //Schritt 5
 			
 			%u VertexID hollen
@@ -99,8 +101,8 @@ algoStepTwo(Graph, Count, OverCount) ->
 %09              Vorgänger(v) := u
 			if ( (Udistance + Cost_u_v) < Vdistance  ) -> 
 				   ModifyGraph = graph_adt:setValV(VvertexID, distance, Udistance + Cost_u_v, Graph),
-				   algoStepTwo(graph_adt:setValV(VvertexID, predecessor, UvertexID, ModifyGraph), Count + 1, OverCount);
-			   true -> algoStepTwo(Graph, Count + 1, OverCount)
+				   algoStepTwoU(graph_adt:setValV(VvertexID, predecessor, UvertexID, ModifyGraph), Count + 1, OverCount);
+			   true -> algoStepTwoU(Graph, Count + 1, OverCount)
 			end
 	end.
 
@@ -109,10 +111,10 @@ algoStepTwo(Graph, Count, OverCount) ->
 
 %Graph = graph_parser:importGraph("c:\\users\\foxhound\\desktop\\bellman.txt", "cost"). 
 %L = bellman_ford:initialize(Graph, 1).
-%bellman_ford:algoStepTwo(L, 1).
+%bellman_ford:overAlgoStepTwoU(L, 1).
 
 %Dieses noch mal Knotenanzahl -1 mal ausfuehren //Count muss 1 sein!
-overAlgoStepTwo(Graph, OverCount) ->
+overAlgoStepTwoU(Graph, OverCount) ->
 	{ Vertices, EdgesD, EdgesU } = Graph,
 	
 	%Herausfinden wie viele Knoten wir ueberhaupt haben
@@ -122,25 +124,171 @@ overAlgoStepTwo(Graph, OverCount) ->
 	if (VerticesCount - 1 == OverCount) -> 
 		   Graph;
 	   true -> 
-			algoStepTwo(Graph, 1, OverCount)		   
+			algoStepTwoU(Graph, 1, OverCount)		   
 	end.
 
 
-%TODO: 
 %10  für jedes (u,v) aus E                
 %11      wenn Distanz(u) + Gewicht(u,v) < Distanz(v) dann
 %12          STOPP mit Ausgabe "Es gibt einen Zyklus negativen Gewichtes."
+%Count muss mit 1 initialisiert werden
+%----------- ABBRUCHBEDINGUNG ------------
+negativeCircleCheck(Graph, Count, Whatever) ->
+	{ Vertices, EdgesD, EdgesU } = Graph,
+	EdgeSize = erlang:length(EdgesU), % + 1, weil index nicht bei null beginnt, sondern bei 1
+
+	if ( EdgeSize + 1 == Count ) -> % + 1, weil index nicht bei null beginnt, sondern bei 1
+		   Graph;
+	   true -> negativeCircleCheck(Graph, Count)
+	end.
 	
-%TODO: Den Teil Graph anzeigen lassen, der heraus gekommen ist. 
+negativeCircleCheck(Graph, Count) -> 
+		{ Vertices, EdgesD, EdgesU } = Graph,
+	
+	EdgeSize = erlang:length(EdgesU), % + 1, weil index nicht bei null beginnt, sondern bei 1
+
+	Edge = lists:nth(Count, EdgesU),
+			
+	%u VertexID hollen
+	UvertexID = erlang:element(1, lists:nth(2, Edge)),
+			
+	%Von u die Distance hollen
+	Udistance = graph_adt:getValV(UvertexID, distance, Graph), %getValV funktioniert nicht!
+			
+	%v VertexID hollen
+	VvertexID = erlang:element(2 , lists:nth(2, Edge)),
+			
+	%Von v die Distance hollen
+	Vdistance = graph_adt:getValV(VvertexID, distance, Graph), %funktioniert nicht!
+			
+	%Gewicht der Kante(u, v) hollen
+	Cost_u_v_inStringList = graph_adt:getValE({UvertexID, VvertexID}, cost, Graph),
+			
+	Cost_u_v = erlang:list_to_integer(Cost_u_v_inStringList),
+			
+%06			 wenn Distanz(u) + Gewicht(u,v) < Distanz(v)
+%07          dann
+%08              Distanz(v) := Distanz(u) + Gewicht(u,v)
+%09              Vorgänger(v) := u
+	if ( (Udistance + Cost_u_v) < Vdistance  ) -> 
+			   zyklusNegativerLaengerGefunden;
+		true -> negativeCircleCheck(Graph, Count + 1, "") %Abbruchbedingung checken
+	end.
 
 
 
+%------------------------------- DIRECTED IMPLEMENTATION BELLMAN & FORD -------------------------
+%TODO: Diese Methode soll nicht mehr aufgerufen werden!!!
+%Graph = graph_parser:importGraph("c:\\users\\foxhound\\desktop\\bellman.txt", "cost"). 
+%04  wiederhole n - 1 mal               
+%05      für jedes (u,v) aus E
+%06          wenn Distanz(u) + Gewicht(u,v) < Distanz(v)
+%07          dann
+%08              Distanz(v) := Distanz(u) + Gewicht(u,v)
+%09              Vorgänger(v) := u
+algoStepTwoDirected(Graph, Count, OverCount) -> 
+	{ Vertices, EdgesD, EdgesU } = Graph,
+	
+	EdgeSize = erlang:length(EdgesD), % + 1, weil index nicht bei null beginnt, sondern bei 1
+
+	if (Count == EdgeSize + 1) -> 
+			overAlgoStepTwoDirected(Graph, OverCount + 1);
+	   true -> 
+			Edge = lists:nth(Count, EdgesD),
+			
+			%Hier hollen wir uns jetzt u und v und pruefen //Schritt 5
+			
+			%u VertexID hollen
+			UvertexID = erlang:element(1, lists:nth(2, Edge)),
+			
+			%Von u die Distance hollen
+			Udistance = graph_adt:getValV(UvertexID, distance, Graph),
+			
+			%v VertexID hollen
+			VvertexID = erlang:element(2 , lists:nth(2, Edge)),
+			
+			%Von v die Distance hollen
+			Vdistance = graph_adt:getValV(VvertexID, distance, Graph),
+			
+			%Gewicht der Kante(u, v) hollen
+			Cost_u_v_inStringList = graph_adt:getValE({UvertexID, VvertexID}, cost, Graph),
+			
+			Cost_u_v = erlang:list_to_integer(Cost_u_v_inStringList),
+			
+%06			 wenn Distanz(u) + Gewicht(u,v) < Distanz(v)
+%07          dann
+%08              Distanz(v) := Distanz(u) + Gewicht(u,v)
+%09              Vorgänger(v) := u
+			if ( (Udistance + Cost_u_v) < Vdistance  ) -> 
+				   ModifyGraph = graph_adt:setValV(VvertexID, distance, Udistance + Cost_u_v, Graph),
+				   algoStepTwoDirected(graph_adt:setValV(VvertexID, predecessor, UvertexID, ModifyGraph), Count + 1, OverCount);
+			   true -> algoStepTwoDirected(Graph, Count + 1, OverCount)
+			end
+	end.
+	
+
+%Graph = graph_parser:importGraph("c:\\users\\foxhound\\desktop\\bellman.txt", "cost"). 
+%L = bellman_ford:initialize(Graph, 1).
+%bellman_ford:overAlgoStepTwoDirected(L, 1).
+
+%Dieses noch mal Knotenanzahl -1 mal ausfuehren //Count muss 1 sein!
+overAlgoStepTwoDirected(Graph, OverCount) ->
+	{ Vertices, EdgesD, EdgesU } = Graph,
+	
+	%Herausfinden wie viele Knoten wir ueberhaupt haben
+	VerticesCount = erlang:length(Vertices),
+	
+	%Hier muss das n erhoeht werden, bis n-1 //Schritt 4
+	if (VerticesCount - 1 == OverCount) -> 
+		   Graph;
+	   true -> 
+			algoStepTwoDirected(Graph, 1, OverCount)		   
+	end.
 
 
 
 
 
 % ----------------- HILFSMETHODEN --------------------- 
+addEdgesUInverse(Graph) ->
+	{ Vertices, EdgesD, EdgesU } = Graph,
+	EdgeSize = erlang:length(EdgesU), % + 1, weil index nicht bei null beginnt, sondern bei 1
+	addEdgesUInverse(Graph, 1, EdgeSize).
+addEdgesUInverse(Graph, Count, EdgeSize) ->
+		{ Vertices, EdgesD, EdgesU } = Graph,
+	
+	io:fwrite("hallo"),
+	if (Count == EdgeSize + 1) -> 
+			Graph;
+	   true -> 
+		   io:fwrite("A"),
+			Edge = lists:nth(Count, EdgesU),
+			io:fwrite("B"),
+		   
+			%u VertexID hollen
+			UvertexID = erlang:element(1, lists:nth(2, Edge)),
+			io:fwrite("C"),
+		   
+			%v VertexID hollen
+			VvertexID = erlang:element(2 , lists:nth(2, Edge)),
+			io:fwrite("D"),
+		   
+			%Kosten aus der Kante hollen
+			EdgeCost = lists:nth(2, lists:nth(3, Edge)),
+			io:fwrite("E"),
+			%Umgekehrte Kante hinzufuegen
+
+			ModifyGraph = graph_adt:addEdgeU(VvertexID, UvertexID, Graph),
+		   	ModifyGraph_2 = graph_adt:setValE({VvertexID, UvertexID}, cost, EdgeCost, ModifyGraph),
+			io:fwrite("F"),
+		   
+			%rekursiv alle Kanten durch laufen
+			addEdgesUInverse(ModifyGraph_2, Count + 1, EdgeSize)
+
+	end.
+	
+
+% ---------- TRASH --------------
 setAttributsV(Graph, []) -> Graph;
 setAttributsV(Graph, [H|T]) ->
 	% ID des Knoten abspeichern
