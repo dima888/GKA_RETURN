@@ -57,7 +57,7 @@ initialize(Graph, SourceID, VerticesIDList, Count) ->
 		   initialize(graph_adt:setValV(CurrentVertexID, distance, 576460752303423488, ModifyGraph), SourceID, lists:delete(CurrentVertexID, VerticesIDList), Count)
 	end.
 
-%TODO: Dieses noch mal Knotenanzahl -1 mal ausfuehren
+%TODO: Diese Methode soll nicht mehr aufgerufen werden!!!
 %Graph = graph_parser:importGraph("c:\\users\\foxhound\\desktop\\bellman.txt", "cost"). 
 %04  wiederhole n - 1 mal               
 %05      für jedes (u,v) aus E
@@ -65,13 +65,13 @@ initialize(Graph, SourceID, VerticesIDList, Count) ->
 %07          dann
 %08              Distanz(v) := Distanz(u) + Gewicht(u,v)
 %09              Vorgänger(v) := u
-algoStepTwo(Graph, Count) -> 
+algoStepTwo(Graph, Count, OverCount) -> 
 	{ Vertices, EdgesD, EdgesU } = Graph,
 	
-	EdgeSize = erlang:length(EdgesU)+1, % + 1, weil index nicht bei null beginnt, sondern bei 1
-	
-	if (Count == EdgeSize) -> 
-		   fertig; %Hier muss das n erhoeht werden, bis n-1 //Schritt 4
+	EdgeSize = erlang:length(EdgesU), % + 1, weil index nicht bei null beginnt, sondern bei 1
+
+	if (Count == EdgeSize + 1) -> 
+			overAlgoStepTwo(Graph, OverCount + 1);
 	   true -> 
 			Edge = lists:nth(Count, EdgesU),
 			%Hier hollen wir uns jetzt u und v und pruefen //Schritt 5
@@ -83,28 +83,25 @@ algoStepTwo(Graph, Count) ->
 			Udistance = graph_adt:getValV(UvertexID, distance, Graph), %getValV funktioniert nicht!
 			
 			%v VertexID hollen
-			VvertexID = erlang:element(2, lists:nth(2, Edge)),
+			VvertexID = erlang:element(2 , lists:nth(2, Edge)),
 			
 			%Von v die Distance hollen
 			Vdistance = graph_adt:getValV(VvertexID, distance, Graph), %funktioniert nicht!
-
+			
 			%Gewicht der Kante(u, v) hollen
 			Cost_u_v_inStringList = graph_adt:getValE({UvertexID, VvertexID}, cost, Graph),
+			
 			Cost_u_v = erlang:list_to_integer(Cost_u_v_inStringList),
-	
+			
 %06			 wenn Distanz(u) + Gewicht(u,v) < Distanz(v)
 %07          dann
 %08              Distanz(v) := Distanz(u) + Gewicht(u,v)
 %09              Vorgänger(v) := u
 			if ( (Udistance + Cost_u_v) < Vdistance  ) -> 
 				   ModifyGraph = graph_adt:setValV(VvertexID, distance, Udistance + Cost_u_v, Graph),
-				   algoStepTwo(graph_adt:setValV(VvertexID, predecessor, UvertexID, ModifyGraph), Count + 1);
-			   true -> algoStepTwo(Graph, Count + 1)
-			end,
-
-			
-			%Testbox return, damit ich schlafen gehen kann
-			[Cost_u_v]
+				   algoStepTwo(graph_adt:setValV(VvertexID, predecessor, UvertexID, ModifyGraph), Count + 1, OverCount);
+			   true -> algoStepTwo(Graph, Count + 1, OverCount)
+			end
 	end.
 
 	%VvertexID_2 = erlang:element(2, lists:nth(2, EdgesD)),
@@ -114,13 +111,27 @@ algoStepTwo(Graph, Count) ->
 %L = bellman_ford:initialize(Graph, 1).
 %bellman_ford:algoStepTwo(L, 1).
 
+%Dieses noch mal Knotenanzahl -1 mal ausfuehren //Count muss 1 sein!
+overAlgoStepTwo(Graph, OverCount) ->
+	{ Vertices, EdgesD, EdgesU } = Graph,
+	
+	%Herausfinden wie viele Knoten wir ueberhaupt haben
+	VerticesCount = erlang:length(Vertices),
+	
+	%Hier muss das n erhoeht werden, bis n-1 //Schritt 4
+	if (VerticesCount - 1 == OverCount) -> 
+		   Graph;
+	   true -> 
+			algoStepTwo(Graph, 1, OverCount)		   
+	end.
 
 
-
-
-
-
-
+%TODO: 
+%10  für jedes (u,v) aus E                
+%11      wenn Distanz(u) + Gewicht(u,v) < Distanz(v) dann
+%12          STOPP mit Ausgabe "Es gibt einen Zyklus negativen Gewichtes."
+	
+%TODO: Den Teil Graph anzeigen lassen, der heraus gekommen ist. 
 
 
 
