@@ -1,6 +1,7 @@
-%% @author Flah
-%% @doc @todo Add description to flussProbleme.
-
+% cd("//Users//Flah//Dropbox//WorkSpace//GKA_RETURN//GKA_PRAKTIKUM//src").
+% c(graph_adt).
+% c(graph_parser).
+% c(flussProbleme).
 
 -module(flussProbleme).
 
@@ -10,21 +11,23 @@
 -compile(export_all).
 
 
-
 %% ====================================================================
 %% Internal functions
 %% ====================================================================
 
 fordFulkerson(Graph, SourceID, TargetID) ->
 	% Schritt 1 - Initialisierung des Flusses mit 0 für jede Kante
-	GraphInit = initialisierung(Graph, []),
-	
 	% Quelle Markieren mit (undefiniert, ∞)
-	graph_adt:setValV(SourceID, marked, {"undefiniert", "∞"}, GraphInit).
+	GraphInit = graph_adt:setValV(SourceID, marked, {"undefiniert", "-1"}, initialisierung(Graph, [])),
 	
 	% Schritt 2 - Inspektion und Markierung
 	% Schritt 2A - Falls alle markierten Knoten inspiziert wurden, gehe zu Schritt 4
+	AllMarkedVerticesInspected = areAllMarkedVerticesInspected(GraphInit),
 	
+	if
+		 AllMarkedVerticesInspected == true -> nil;	% Springe zu Schritt 4
+			   						   true -> nil  % Mache weiter mit Schritt 2B
+	end,
 	
 	% Schritt 2B - Wähle eine beliebig markierte, aber noch NICHT inspizierte Ecke vi und
 	% inspiziere sie wie folgt (Berechnung des Inkrements)
@@ -47,7 +50,11 @@ fordFulkerson(Graph, SourceID, TargetID) ->
 	% Der jetzige Weg von d ist optimal. Ein Schnitt A(X, Komplement(X)) mit c(X, Komplement(X)) = d
 	% wird gebildet von genau denjenigen Kanten, bei denen entweder der Anfangsknoten oder der
 	% Endknoten inspiziert ist
-	%nil.
+	nil.
+
+%%================================================================================================================
+%% 												HILFSMETHODEN	
+%%================================================================================================================
 
 % Weißt allen Kanten 0 als initialen Wert für den flow zu
 initialisierung({Vertices, EdgesD, EdgesU}, Result) ->
@@ -74,8 +81,10 @@ setAttributsE(Graph, [H|T]) ->
 	% Wert von is im tupel {max, is} von Attribut maxis auf 0 setzten und max beibehalten
 	setAttributsE(graph_adt:setValE(ID, maxis, {element(1, graph_adt:getValE(ID, maxis, Graph)), "0"}, Graph), T).
 
-% cd("//Users//Flah//Dropbox//WorkSpace//GKA_RETURN//GKA_PRAKTIKUM//src").
-% flussProbleme:fordFulkerson({[[vertex, 1, [name, "q"]], [vertex, 2, [name, "v1"]], [vertex, 3, [name, "s"]]], [[edgeD, {1,2}, [maxis, {"4","1"}]]], []}, 1, 3).
+areAllMarkedVerticesInspected(Graph) ->
+	nil.
+
+% flussProbleme:fordFulkerson({[[vertex, 1], [vertex, 2], [vertex, 3], [[edgeD, {1,2}]], []}, 1, 3).
 
 
 	
