@@ -82,13 +82,13 @@ algoStepTwoU(Graph, Count, OverCount) ->
 			UvertexID = erlang:element(1, lists:nth(2, Edge)),
 			
 			%Von u die Distance hollen
-			Udistance = graph_adt:getValV(UvertexID, distance, Graph), %getValV funktioniert nicht!
+			Udistance = graph_adt:getValV(UvertexID, distance, Graph), 
 			
 			%v VertexID hollen
 			VvertexID = erlang:element(2 , lists:nth(2, Edge)),
 			
 			%Von v die Distance hollen
-			Vdistance = graph_adt:getValV(VvertexID, distance, Graph), %funktioniert nicht!
+			Vdistance = graph_adt:getValV(VvertexID, distance, Graph), 
 			
 			%Gewicht der Kante(u, v) hollen
 			Cost_u_v_inStringList = graph_adt:getValE({UvertexID, VvertexID}, cost, Graph),
@@ -102,6 +102,13 @@ algoStepTwoU(Graph, Count, OverCount) ->
 			if ( (Udistance + Cost_u_v) < Vdistance  ) -> 
 				   ModifyGraph = graph_adt:setValV(VvertexID, distance, Udistance + Cost_u_v, Graph),
 				   algoStepTwoU(graph_adt:setValV(VvertexID, predecessor, UvertexID, ModifyGraph), Count + 1, OverCount);
+			   
+%% 			   ( (Vdistance + Cost_u_v) < Udistance  ) ->
+%% 				   io:fwrite("Ich bin in else if"),
+%% 				   ModifyGraph = graph_adt:setValV(UvertexID, distance, Vdistance + Cost_u_v, Graph),
+%% 				   algoStepTwoU(graph_adt:setValV(UvertexID, predecessor, VvertexID, ModifyGraph), Count + 1, OverCount);
+			   %TODO: Hier noch ein else if rein hauen und Udistance mit Vdistance vertauschen
+
 			   true -> algoStepTwoU(Graph, Count + 1, OverCount)
 			end
 	end.
@@ -190,29 +197,29 @@ algoStepTwoDirected(Graph, Count, OverCount) ->
 	{ Vertices, EdgesD, EdgesU } = Graph,
 	
 	EdgeSize = erlang:length(EdgesD), % + 1, weil index nicht bei null beginnt, sondern bei 1
-
+	io:fwrite("A"),
 	if (Count == EdgeSize + 1) -> 
 			overAlgoStepTwoDirected(Graph, OverCount + 1);
 	   true -> 
 			Edge = lists:nth(Count, EdgesD),
-			
+			io:fwrite("AB"),		
 			%Hier hollen wir uns jetzt u und v und pruefen //Schritt 5
 			
 			%u VertexID hollen
 			UvertexID = erlang:element(1, lists:nth(2, Edge)),
-			
+			io:fwrite("ABC"),
 			%Von u die Distance hollen
 			Udistance = graph_adt:getValV(UvertexID, distance, Graph),
-			
+			io:fwrite("ABCD"),
 			%v VertexID hollen
 			VvertexID = erlang:element(2 , lists:nth(2, Edge)),
-			
+			io:fwrite("ABCDE"),
 			%Von v die Distance hollen
 			Vdistance = graph_adt:getValV(VvertexID, distance, Graph),
-			
+			io:fwrite("ABCDEF"),
 			%Gewicht der Kante(u, v) hollen
 			Cost_u_v_inStringList = graph_adt:getValE({UvertexID, VvertexID}, cost, Graph),
-			
+			io:fwrite("ABCDEFG"),
 			Cost_u_v = erlang:list_to_integer(Cost_u_v_inStringList),
 			
 %06			 wenn Distanz(u) + Gewicht(u,v) < Distanz(v)
@@ -257,30 +264,24 @@ addEdgesUInverse(Graph) ->
 addEdgesUInverse(Graph, Count, EdgeSize) ->
 		{ Vertices, EdgesD, EdgesU } = Graph,
 	
-	io:fwrite("hallo"),
 	if (Count == EdgeSize + 1) -> 
-			Graph;
+		   SuperEdge = lists:append(EdgesD, EdgesU),
+ 		   { Vertices, SuperEdge, EdgesU };
 	   true -> 
-		   io:fwrite("A"),
 			Edge = lists:nth(Count, EdgesU),
-			io:fwrite("B"),
 		   
 			%u VertexID hollen
-			UvertexID = erlang:element(1, lists:nth(2, Edge)),
-			io:fwrite("C"),
+        			UvertexID = erlang:element(1, lists:nth(2, Edge)),
 		   
 			%v VertexID hollen
 			VvertexID = erlang:element(2 , lists:nth(2, Edge)),
-			io:fwrite("D"),
 		   
 			%Kosten aus der Kante hollen
 			EdgeCost = lists:nth(2, lists:nth(3, Edge)),
-			io:fwrite("E"),
+		   
 			%Umgekehrte Kante hinzufuegen
-
-			ModifyGraph = graph_adt:addEdgeU(VvertexID, UvertexID, Graph),
+			ModifyGraph = graph_adt:addEdgeD(VvertexID, UvertexID, Graph),
 		   	ModifyGraph_2 = graph_adt:setValE({VvertexID, UvertexID}, cost, EdgeCost, ModifyGraph),
-			io:fwrite("F"),
 		   
 			%rekursiv alle Kanten durch laufen
 			addEdgesUInverse(ModifyGraph_2, Count + 1, EdgeSize)
