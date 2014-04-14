@@ -236,7 +236,8 @@ algoStepTwoDirected(Graph, Count, OverCount) ->
 
 %Graph = graph_parser:importGraph("c:\\users\\foxhound\\desktop\\bellman.txt", "cost"). 
 %L = bellman_ford:initialize(Graph, 1).
-%bellman_ford:overAlgoStepTwoDirected(L, 1).
+%A = bellman_ford:addEdgesUInverse(L).
+%bellman_ford:overAlgoStepTwoDirected(A, 1).
 
 %Dieses noch mal Knotenanzahl -1 mal ausfuehren //Count muss 1 sein!
 overAlgoStepTwoDirected(Graph, OverCount) ->
