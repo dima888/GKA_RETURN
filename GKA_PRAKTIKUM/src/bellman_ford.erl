@@ -103,10 +103,10 @@ algoStepTwoU(Graph, Count, OverCount) ->
 				   ModifyGraph = graph_adt:setValV(VvertexID, distance, Udistance + Cost_u_v, Graph),
 				   algoStepTwoU(graph_adt:setValV(VvertexID, predecessor, UvertexID, ModifyGraph), Count + 1, OverCount);
 			   
-%% 			   ( (Vdistance + Cost_u_v) < Udistance  ) ->
-%% 				   io:fwrite("Ich bin in else if"),
-%% 				   ModifyGraph = graph_adt:setValV(UvertexID, distance, Vdistance + Cost_u_v, Graph),
-%% 				   algoStepTwoU(graph_adt:setValV(UvertexID, predecessor, VvertexID, ModifyGraph), Count + 1, OverCount);
+			   ( (Vdistance + Cost_u_v) < Udistance  ) ->
+				   %io:fwrite("Ich bin in else if"),
+				   ModifyGraph = graph_adt:setValV(VvertexID, distance, Udistance + Cost_u_v, Graph),
+				   algoStepTwoU(graph_adt:setValV(VvertexID, predecessor, UvertexID, ModifyGraph), Count + 1, OverCount);
 			   %TODO: Hier noch ein else if rein hauen und Udistance mit Vdistance vertauschen
 
 			   true -> algoStepTwoU(Graph, Count + 1, OverCount)
@@ -119,6 +119,10 @@ algoStepTwoU(Graph, Count, OverCount) ->
 %Graph = graph_parser:importGraph("c:\\users\\foxhound\\desktop\\bellman.txt", "cost"). 
 %L = bellman_ford:initialize(Graph, 1).
 %bellman_ford:overAlgoStepTwoU(L, 1).
+
+%Graph = graph_parser:importGraph("c:\\users\\foxhound\\desktop\\test.txt", "cost").
+%I = bellman_ford:initialize(Graph, 14).
+%bellman_ford:overAlgoStepTwoU(I, 1).
 
 %Dieses noch mal Knotenanzahl -1 mal ausfuehren //Count muss 1 sein!
 overAlgoStepTwoU(Graph, OverCount) ->
@@ -197,37 +201,36 @@ algoStepTwoDirected(Graph, Count, OverCount) ->
 	{ Vertices, EdgesD, EdgesU } = Graph,
 	
 	EdgeSize = erlang:length(EdgesD), % + 1, weil index nicht bei null beginnt, sondern bei 1
-	io:fwrite("A"),
+	
 	if (Count == EdgeSize + 1) -> 
 			overAlgoStepTwoDirected(Graph, OverCount + 1);
 	   true -> 
 			Edge = lists:nth(Count, EdgesD),
-			io:fwrite("AB"),		
+	
 			%Hier hollen wir uns jetzt u und v und pruefen //Schritt 5
 			
 			%u VertexID hollen
 			UvertexID = erlang:element(1, lists:nth(2, Edge)),
-			io:fwrite("ABC"),
+
 			%Von u die Distance hollen
 			Udistance = graph_adt:getValV(UvertexID, distance, Graph),
-			io:fwrite("ABCD"),
+
 			%v VertexID hollen
 			VvertexID = erlang:element(2 , lists:nth(2, Edge)),
-			io:fwrite("ABCDE"),
+
 			%Von v die Distance hollen
 			Vdistance = graph_adt:getValV(VvertexID, distance, Graph),
-			io:fwrite("ABCDEF"),
+
 			%Gewicht der Kante(u, v) hollen
 			Cost_u_v_inStringList = graph_adt:getValE({UvertexID, VvertexID}, cost, Graph),
-			io:fwrite("ABCDEFG"),
 			Cost_u_v = erlang:list_to_integer(Cost_u_v_inStringList),
 			
 %06			 wenn Distanz(u) + Gewicht(u,v) < Distanz(v)
 %07          dann
 %08              Distanz(v) := Distanz(u) + Gewicht(u,v)
 %09              Vorgänger(v) := u
-			if ( (Udistance + Cost_u_v) < Vdistance  ) -> 
-				   ModifyGraph = graph_adt:setValV(VvertexID, distance, Udistance + Cost_u_v, Graph),
+			if ( ( (Udistance + (Cost_u_v)) < Vdistance ) ) -> 
+				   ModifyGraph = graph_adt:setValV(VvertexID, distance, (Udistance + (Cost_u_v)), Graph),
 				   algoStepTwoDirected(graph_adt:setValV(VvertexID, predecessor, UvertexID, ModifyGraph), Count + 1, OverCount);
 			   true -> algoStepTwoDirected(Graph, Count + 1, OverCount)
 			end
@@ -236,12 +239,12 @@ algoStepTwoDirected(Graph, Count, OverCount) ->
 
 %Graph = graph_parser:importGraph("c:\\users\\foxhound\\desktop\\bellman.txt", "cost"). 
 %L = bellman_ford:initialize(Graph, 1).
-%bellman_ford:overAlgoStepTwoDirected(L, 1).
+%A = bellman_ford:addEdgesUInverse(L).
+%bellman_ford:overAlgoStepTwoDirected(A, 1).
 
 %Dieses noch mal Knotenanzahl -1 mal ausfuehren //Count muss 1 sein!
 overAlgoStepTwoDirected(Graph, OverCount) ->
 	{ Vertices, EdgesD, EdgesU } = Graph,
-	
 	%Herausfinden wie viele Knoten wir ueberhaupt haben
 	VerticesCount = erlang:length(Vertices),
 	
@@ -249,7 +252,7 @@ overAlgoStepTwoDirected(Graph, OverCount) ->
 	if (VerticesCount - 1 == OverCount) -> 
 		   Graph;
 	   true -> 
-			algoStepTwoDirected(Graph, 1, OverCount)		   
+			 algoStepTwoDirected(Graph, 1, OverCount)		   
 	end.
 
 
