@@ -66,22 +66,27 @@ initialize(Graph, Distance_Matrix, Transit_Matrix, Vertices_List, Current_ID_Ind
 	   true -> initialize(Graph, Distance_Matrix, Transit_Matrix, Vertices_List, Current_ID_Index, Terminate, Vertices_List, N, Index + 1, Modify_Inner_Distance_Matrix, Modify_Inner_Transit_Matrix) 
 	end.
 
-
-%TODO: Oberste "schleife" Fuer j = 1, ..., |V|:
+%Oberste "schleife" Fuer j = 1, ..., |V|:
 highLevel(Distance_Matrix, Transit_Matrix, J) -> 
+
+	Terminate = erlang:length(Distance_Matrix),
 	
+	if ( J > Terminate ) ->
+		   [Distance_Matrix, Transit_Matrix];
+	true ->
+	middleLevel(Distance_Matrix, Transit_Matrix, J, 1)
+	end.
 
-	middleLevel(Distance_Matrix, Transit_Matrix, J, 1).
-
-
-
-
-%TODO: Die mittlere "schleife" die in der Oberen laeuft: Fuer i = 1,....,|V|; 
+%Die mittlere "schleife" die in der Oberen laeuft: Fuer i = 1,....,|V|; 
 %k =/= j -> Gehe in noch eine tiefere "Schleife" von mittlere "Schleife" und fuehre da 
 %folgendes aus: Setzte d_ik = min{d_ik, d_ij + djk}
 middleLevel(Distance_Matrix, Transit_Matrix, J, I) -> 
 	
-	%TODO: Wenn die Schleife Durchgelaufen ist, dann zu Highlevel und J + 1
+	Terminate = erlang:length(Distance_Matrix),
+	
+	if (I > Terminate) ->
+		   highLevel(Distance_Matrix, Transit_Matrix, J + 1);
+	true ->
 	
 	%Falls d_ii < 0 ist, brich den Algorithmus vorzeitig ab. (Kreis negativer Laenge gefunden)
 	Elem_i_i = lists:nth(I, lists:nth(I, Distance_Matrix)),
@@ -97,21 +102,82 @@ middleLevel(Distance_Matrix, Transit_Matrix, J, I) ->
 				   %Algorithmus weiter ausfuereh ( i == j )
 					middleLevel(Distance_Matrix, Transit_Matrix, J, I + 1)
 			end
-	end.
+	end
+end.
 
 %TODO: %folgendes aus: Setzte d_ik = min{d_ik, d_ij + djk}
 lowLevel(Distance_Matrix, Transit_Matrix, J, I, K) -> 
 	
-	%TODO: Wenn die Schleife durch gelaufen ist, dann zu middleLevel und I + 1
+	Terminate = erlang:length(Distance_Matrix),
+	if (K > Terminate) -> 
+		   middleLevel(Distance_Matrix, Transit_Matrix, J, I + 1);
+	true -> 
 	
 	% k =/= j
 	if (K =/= J) ->
-		   X = 24;
+		   
+		    %d_ik ermitteln
+			Elem_i_k = lists:nth(K, lists:nth(I, Distance_Matrix)),
+			
+			%d_ij ermitteln
+			Elem_i_j = lists:nth(J, lists:nth(I, Distance_Matrix)),
+			
+			%d_jk ermitteln
+			Elem_j_k = lists:nth(K, lists:nth(J, Distance_Matrix)), 
+			
+			%Dieses Element kommt an die Stelle d_ik
+			To_Install_Elem = erlang:min(Elem_i_k, Elem_i_j + Elem_j_k),
+			
+			%Jetzt kommt der komplizierte Teil, jedoch nur in Erlang kompliziert, das Element einsetzten
+			
+			%Gib mir Alle Listen vor I
+			Head = lists:sublist(Distance_Matrix, I-1),
+			
+			%Gib mir Alle Listen Nach I
+			Tail = lists:nthtail(I, Distance_Matrix),
+		   
+			%Gib mir die Liste, in der ein Element Modifiziert wird
+			Middle = lists:nth(I, Distance_Matrix),
+			
+			%Jetzt hollen wir uns wieder die Teile aus der Liste Middle
+			Middle_Head = lists:sublist(Middle, K-1),
+			Middle_Tail = lists:nthtail(K, Middle),
+			
+			%Modifizierte Distance Matrix zusammen bauen
+			Modify_Middle = Middle_Head ++ [To_Install_Elem] ++ Middle_Tail,			
+			Modify_Distance_Matrix = Head ++ [Modify_Middle] ++ Tail,
+		   
+			%io:write(Modify_Distance_Matrix), io:nl(), io:fwrite("-------------"), io:nl(),
+			
+			%TODO: Falls was in d_ik gesetzt wurde, dann t_ik ermitteln und = j setzten
+			if (To_Install_Elem =/= Elem_i_k) ->
+				   
+				   %Gib mir die Liste vor I
+				   Head_T = lists:sublist(Transit_Matrix, I - 1),
+				   
+				   %Gib mir die Liste nach I
+				   Tail_T = lists:nthtail(I, Transit_Matrix),
+				   
+				   %Gib mir die Liste, in der ein Element Modifiziert wird
+				   Middle_T = lists:nth(I, Transit_Matrix),
+				   
+				   %Jetzt hollen wir uns wieder die Teile aus der Liste Middle
+				   Middle_Head_T = lists:sublist(Middle_T, K-1),
+				   Middle_Tail_T = lists:nthtail(K, Middle_T),
+			
+				   %Modifizierte Transitmatrix zusammen bauen
+				   Modify_Middle_T = Middle_Head_T ++ [J] ++ Middle_Tail_T,
+				   Modify_Transit_Matrix = Head_T ++ [Modify_Middle_T] ++ Tail_T,
+				   lowLevel(Modify_Distance_Matrix, Modify_Transit_Matrix, J, I, K + 1);
+			   
+			true ->
+				lowLevel(Modify_Distance_Matrix, Transit_Matrix, J, I, K + 1)
+			end;
+			
 	   true -> 
 		   lowLevel(Distance_Matrix, Transit_Matrix, J, I, K + 1)
-	end.
-	
-
+	end
+end.
 
 
 
