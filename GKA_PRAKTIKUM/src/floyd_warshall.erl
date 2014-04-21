@@ -1,6 +1,8 @@
 %% @author foxhound
 %% @doc @todo Add description to floyd_warshall.
 %16.04.2014 -> 3std.
+%19.04.2014 -> 3std.
+%20.04.2014 -> 3std.
 
 -module(floyd_warshall).
 
@@ -15,8 +17,65 @@
 %% Internal functions
 %% ====================================================================
 
-%TODO: Fuer den ungerichteten Graphen kann ich wieder den spezial Trick benutzen
 %Initialisiert die Distanz und Transit Matix
+
+%Graph = graph_parser:importGraph("c:\\users\\foxhound\\desktop\\floyd.txt", "cost")
+%Nur diese Methode soll aufgerufen werden
+startAlgorithm(Graph, Source_ID, Target_ID) ->
+	{ Vertices, EdgesD, EdgesU } = Graph,
+		
+	%Referenzieren zwischen gerichteten und ungerichteten Graphen
+	if ( erlang:length(EdgesD) == 0) ->	   
+		   
+	%----------- DER FALL FUER UNGERICHTETEN GRAPHEN -----------
+
+	%SpezialTrick anwenden
+	Modify_Graph = lists:nth(1, bellman_ford:addEdgesUInverse(Graph, 1)),
+		   
+	Distance_Transite_Matrix = initialize(Modify_Graph),	
+		
+	%Berechnete Matritzen: [1] -> Distance Matrix; [2] -> Transit Matrix
+	Result_Distance_Transit_Matrix = highLevel(lists:nth(1, Distance_Transite_Matrix), lists:nth(2, Distance_Transite_Matrix), 1),
+	
+	%Result -> Die Distance zwischen Zwei Knoten
+	Distance_Matrix = lists:nth(1, Result_Distance_Transit_Matrix),
+
+	%Indezes ermitteln, durch die Vertices List, an welcher Stelle Source ID oder Target ID
+	%Steht ist der Index der Distance Matrix auf die ich zugreifen muss. 
+	VerticesList = graph_adt:getVertexes(Graph),	
+	Index_Of_Source_ID = index_of(Source_ID, VerticesList),
+	Index_Of_Target_ID = index_of(Target_ID, VerticesList),
+	
+	%Spezial Trick wieder rueckgaengig machen, muss nicht sein, finde ich aber schoener!
+	Modify_Graph_2 = { erlang:element(1, Modify_Graph), [], erlang:element(3, Modify_Graph) },
+	
+	%Result
+	io:fwrite("Zugriffe auf den Graph: "), io:write(1), io:fwrite(" || Optimale Route: "),
+	lists:nth(Index_Of_Target_ID, lists:nth(Index_Of_Source_ID, Distance_Matrix));
+	true ->
+
+		%------------ DER FALL FUER GERICHTETEN GRAPHEN ------------
+	
+	%Initialisierungsphase [1] -> Distance Matrix; [2] -> Transit Matrix
+	Distance_Transite_Matrix = initialize(Graph),	
+		
+	%Berechnete Matritzen: [1] -> Distance Matrix; [2] -> Transit Matrix
+	Result_Distance_Transit_Matrix = highLevel(lists:nth(1, Distance_Transite_Matrix), lists:nth(2, Distance_Transite_Matrix), 1),
+	
+	%Result -> Die Distance zwischen Zwei Knoten
+	Distance_Matrix = lists:nth(1, Result_Distance_Transit_Matrix),
+
+	%Indezes ermitteln, durch die Vertices List, an welcher Stelle Source ID oder Target ID
+	%Steht ist der Index der Distance Matrix auf die ich zugreifen muss. 
+	VerticesList = graph_adt:getVertexes(Graph),	
+	Index_Of_Source_ID = index_of(Source_ID, VerticesList),
+	Index_Of_Target_ID = index_of(Target_ID, VerticesList),
+	
+	%Result
+	io:fwrite("Zugriffe auf den Graph: "), io:write(1), io:fwrite(" || Optimale Route: "),
+	lists:nth(Index_Of_Target_ID, lists:nth(Index_Of_Source_ID, Distance_Matrix))
+	end.
+
 
 %Aufruf der Methode // %Das n unsere quadratischen 2d Matrix
 %Gibt einer Liste von zwei Matrizen zurueck, 
@@ -105,7 +164,7 @@ middleLevel(Distance_Matrix, Transit_Matrix, J, I) ->
 	end
 end.
 
-%TODO: %folgendes aus: Setzte d_ik = min{d_ik, d_ij + djk}
+%folgendes aus: Setzte d_ik = min{d_ik, d_ij + djk}
 lowLevel(Distance_Matrix, Transit_Matrix, J, I, K) -> 
 	
 	Terminate = erlang:length(Distance_Matrix),
@@ -149,7 +208,7 @@ lowLevel(Distance_Matrix, Transit_Matrix, J, I, K) ->
 		   
 			%io:write(Modify_Distance_Matrix), io:nl(), io:fwrite("-------------"), io:nl(),
 			
-			%TODO: Falls was in d_ik gesetzt wurde, dann t_ik ermitteln und = j setzten
+			%Falls was in d_ik gesetzt wurde, dann t_ik ermitteln und = j setzten
 			if (To_Install_Elem =/= Elem_i_k) ->
 				   
 				   %Gib mir die Liste vor I
@@ -179,8 +238,12 @@ lowLevel(Distance_Matrix, Transit_Matrix, J, I, K) ->
 	end
 end.
 
-
-
+%----------------------------- HILFSMETHODEN -----------------------------
+%QUELLE: stackoverflow.com/questions/1459152/erlang-listsindex-of-function
+index_of(Item, List) -> index_of(Item, List, 1).
+index_of(_, [], _)  -> not_found;
+index_of(Item, [Item|_], Index) -> Index;
+index_of(Item, [_|Tl], Index) -> index_of(Item, Tl, Index+1).
 
 
 
