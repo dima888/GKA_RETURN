@@ -6,12 +6,26 @@
 
 -module(floyd_warshall).
 
+%Algorithmus aus dem GRBuch Seite 53
+%% dij := 
+%% (
+%% lij für vivj element E und i 6= j
+%% 0 für i = j
+%% Unendlich sonst
+%% tij := 0
+
+%% Für j = 1, . . . , |V |:
+%% * Für i = 1, . . . , |V |; i 6= j:
+%% - Für k = 1, . . . , |V |; k 6= j:
+%% ** Setze dik := min{dik, dij + djk}.
+%% ** Falls dik verändert wurde, setze tik := j.
+%% - Falls dii < 0 ist, brich den Algorithmus vorzeitig ab. (Es wurde ein
+%% Kreis negativer Länge gefunden.)
+
 %% ====================================================================
 %% API functions
 %% ====================================================================
 -compile(export_all).
-
-
 
 %% ====================================================================
 %% Internal functions
@@ -244,21 +258,3 @@ index_of(Item, List) -> index_of(Item, List, 1).
 index_of(_, [], _)  -> not_found;
 index_of(Item, [Item|_], Index) -> Index;
 index_of(Item, [_|Tl], Index) -> index_of(Item, Tl, Index+1).
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
