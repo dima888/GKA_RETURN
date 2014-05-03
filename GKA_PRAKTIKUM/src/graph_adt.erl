@@ -342,7 +342,7 @@ getIncident(V_ID1, Graph) ->
 %returns: Liste von Tupeln {s/t/u, Ecken-ID}
 %wobei s bzw. t angibt, ob diese Ecke source oder
 %target zu V_ID1 ist oder u für ungerichtet
-getAdjacent(V_ID1,Graph) -> 
+getAdjacent(V_ID1, Graph) -> 
 	{ Vertices, EdgesD, EdgesU } = Graph,
 	
 	%------------- PRECONDITION --------------

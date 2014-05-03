@@ -184,7 +184,7 @@ maxisUndirektedImport(Datei, Graph, V_ID1, V_ID2, Device, Count) ->
 	
 	%Alle AttributeValue aus der Textdatei raus hollen
 	SourceValName = lists:nth(1, PartGraph),
-	TargetValName = lists:nth(2, PartGraph),
+	TargetValName = lists:nth(2, PartGraph), 
 	CoustVal = lists:nth(3, PartGraph),
 	MaxisVal = lists:nth(4, PartGraph),
 
