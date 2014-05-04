@@ -56,6 +56,11 @@
 
 %Graph = graph_parser:importGraph("c:\\users\\foxhound\\desktop\\bellman.txt", "cost").
 
+%Graph = graph_parser:importGraph("c:\\users\\foxhound\\desktop\\wiki.txt", "cost").
+%M1 = hierholzer:createUnderCircleVerion_2(Graph, 1, [], [], 1).
+%M2 = hierholzer:createUnderCircleVerion_2(lists:nth(1, M1), 1, [], lists:nth(2, M1), 1).
+%M3 = hierholzer:createUnderCircleVerion_2(lists:nth(1, M2), 6, [], lists:nth(2, M2), 6).
+
 %Methode prueft, ob alle Knoten einen geraden Grad aufweisen: PRECONDITION
 checkDirectOrder(Graph) -> 
 	{ Vertices, EdgesD, EdgesU } = Graph,
@@ -130,27 +135,132 @@ isCompound(Graph, Vertices_List, Current_Vertices_Index) ->
 
 %1. Wähle einen beliebigen Knoten v_0 des Graphen und konstruiere von v_0 ausgehend
 %   einen Unterkreis K in G, der keine Kante in G zweimal durchläuft.
-createUnderCircle(Graph, Random_Vertex_ID, Not_Allowed_Edges, Under_Graph_Vertices_ID) ->
-	
-	%Einen beliebigen Knoten aus Graph nehmen
-	Start_Value = Random_Vertex_ID,
+createUnderCircle(Graph, Random_Vertex_ID, Not_Allowed_Edges, Under_Graph_Vertices_ID, Under_Graph_Vertices_ID_Buffer, Start_Vertex_ID) ->
+	{ Vertices, EdgesD, EdgesU } = Graph,
+	%Random_Vertex_ID ist ein beliebiger Knoten aus Graph
+
+	%Den Weg des Untergraphen abspeichern
+	Modify_Under_Graph_Vertices_ID = Under_Graph_Vertices_ID ++ [Random_Vertex_ID],
 	
 	%Erstmal Alle Kanten zum Aktuellen Knoten ermitteln
 	Edges_List = graph_adt:getIncident(Random_Vertex_ID, Graph),
 	
-	%Alle legitimen Wege ermitteln TODO: Hier ist noch ein Fehler
-	Legitim_Edges = [ X || X <- Edges_List, (not lists:member(X, Not_Allowed_Edges)) ].
+	%Alle legitimen Wege ermitteln 
+	Legitim_Edges = [ X || X <- Edges_List, (not lists:member(X, Not_Allowed_Edges)) ],
 	
-	%Sich einen beliegen Weg aussuchen, in unseren Fall immer mit den index 1
-	%Use_Edge_ID = lists:nth(1, Legitim_Edges_ID),
+	%TODO: Schauen was getann wird, wenn kein legitimer Weg mehr vorhanden ist
+	
+	
+	%Sich einen beliegen Weg (Kante) aussuchen, in unseren Fall immer mit den index 1
+	Using_Edge = lists:nth(1, Legitim_Edges),
 	
 	%Benutze Kante vermerken, dass wir da nicht noch ein mal durch laufen duerfen
-	%Not_Allowed_Edges ++ [Use_Edge_ID],
+	Modify_Not_Allowed_Edges = Not_Allowed_Edges ++ [Using_Edge],
 	
 	%Jetzt wollen wir den Aktuellen Knoten ermitteln, an den wir von Random_Vertexx_ID angekommen sind
-	%Erstmal alle Adjazenten zur Random_Vertex_ID hollen
-	%All_Ajacent_To_Random_Vertex_ID = graph_adt:getAdjacent(Random_Vertex_ID, Graph),
+	%Source oder Target ist jetzt das Aktuelle Element (Vertex ID)
+	Source_Vertex_ID = element(1, lists:nth(2, Using_Edge)),
+	Target_Vertex_ID = element(2, lists:nth(2, Using_Edge)),
 	
+	Source_Target_List = [Source_Vertex_ID] ++ [Target_Vertex_ID],
+	
+	%Die aktuelle Vertex ID jetzt ermitteln
+	Current_Vertex_ID = lists:nth(1, [ X || X <- Source_Target_List, X =/= Random_Vertex_ID] ),
+	
+	if ( Start_Vertex_ID =:= Current_Vertex_ID ) ->
+		   %TODO: 
+		   %Neue Startwerte ermitteln und
+		   %hier solange sich selbst auf rufen, bis wir alle Untergraphen haben
+		   [ Under_Graph_Vertices_ID_Buffer ++ [Modify_Under_Graph_Vertices_ID ++ [Start_Vertex_ID]], Modify_Not_Allowed_Edges ];
+	   	   
+	true ->
+		io:fwrite("Rekursion"), io:nl(),
+		createUnderCircle(Graph, Current_Vertex_ID, Modify_Not_Allowed_Edges, Modify_Under_Graph_Vertices_ID, Under_Graph_Vertices_ID_Buffer, Start_Vertex_ID) 
+		
+	end.
+
+createUnderCircleVerion_2(Graph, Random_Vertex_ID, Under_Graph_Vertices_ID, Under_Graph_Vertices_ID_Buffer, Start_Vertex_ID) ->
+	{ Vertices, EdgesD, EdgesU } = Graph,
+	%Random_Vertex_ID ist ein beliebiger Knoten aus Graph
+
+	%Den Weg des Untergraphen abspeichern
+	Modify_Under_Graph_Vertices_ID = Under_Graph_Vertices_ID ++ [Random_Vertex_ID],
+	
+	%Alle legitimen Wege ermitteln 
+	Edges_List = graph_adt:getIncident(Random_Vertex_ID, Graph),
+	
+	%TODO: Schauen was getann wird, wenn kein legitimer Weg mehr vorhanden ist
+	%Erstmal provisorisch!
+	if ( EdgesU =:= [] ) ->
+		   Graph;
+	true ->
+	
+	%Sich einen beliegen Weg (Kante) aussuchen, in unseren Fall immer mit den index 1
+	Using_Edge = lists:nth(1, Edges_List),
+	
+	%Jetzt wollen wir den Aktuellen Knoten ermitteln, an den wir von Random_Vertexx_ID angekommen sind
+	%Source oder Target ist jetzt das Aktuelle Element (Vertex ID)
+	Source_Vertex_ID = element(1, lists:nth(2, Using_Edge)),
+	Target_Vertex_ID = element(2, lists:nth(2, Using_Edge)),
+	
+	%Benutze Kante entfernen, den sie darf nicht zwei mal durchlaufen werden
+	Modify_Graph = graph_adt:deleteEdge(Source_Vertex_ID, Target_Vertex_ID, Graph),
+	
+	Source_Target_List = [Source_Vertex_ID] ++ [Target_Vertex_ID],
+	
+	%Die aktuelle Vertex ID jetzt ermitteln
+	Current_Vertex_ID = lists:nth(1, [ X || X <- Source_Target_List, X =/= Random_Vertex_ID] ),
+	
+	if ( Start_Vertex_ID =:= Current_Vertex_ID ) ->
+		   %TODO: 
+		   %Neue Startwerte ermitteln und
+		   %hier solange sich selbst auf rufen, bis wir alle Untergraphen haben
+
+		   Mod_U_G_V_G = Under_Graph_Vertices_ID_Buffer ++ [Modify_Under_Graph_Vertices_ID ++ [Start_Vertex_ID]],
+		   Mod_U_G_V = Modify_Under_Graph_Vertices_ID ++ [Start_Vertex_ID],
+		   
+		   
+		   %TODO: Hier richtig zusammen bauen, startVertex muss sich auch anpassen
+		   %io:write(Mod_U_G_V), io:nl(), io:write( Mod_U_G_V_G), io:nl(),
+		   %[ Under_Graph_Vertices_ID_Buffer ++ [Modify_Under_Graph_Vertices_ID ++ [Start_Vertex_ID]], Modify_Not_Allowed_Edges ];
+		   %Next_Legitim_Vertex_ID = searchNewStartVertex(Modify_Graph, Mod_U_G_V, 1),
+		   [ Modify_Graph, Under_Graph_Vertices_ID_Buffer ++ [Modify_Under_Graph_Vertices_ID ++ [Start_Vertex_ID]] , Mod_U_G_V];
+		   %createUnderCircleVerion_2(Modify_Graph, Next_Legitim_Vertex_ID, Modify_Under_Graph_Vertices_ID, Under_Graph_Vertices_ID_Buffer, Start_Vertex_ID);
+	true ->
+		createUnderCircleVerion_2(Modify_Graph, Current_Vertex_ID, Modify_Under_Graph_Vertices_ID, Under_Graph_Vertices_ID_Buffer, Start_Vertex_ID) 
+		
+	end
+	
+	end.
+
+%%4. Am ersten Eckpunkt von K, dessen Grad größer 0 ist, lässt man nun einen weiteren Unterkreis K' entstehen, der keine Kante in K durchläuft
+%%   und keine Kante in G zweimal enthält.
+searchNewStartVertex(Graph, Vertices_ID_List, Index) ->
+	
+	io:write(lists:nth(Index, Vertices_ID_List)), io:nl(), io:fwrite("----"), io:nl(),
+	
+	%Abbruchbedinung
+	if ( Index > length(Vertices_ID_List) ) -> 
+		kein_weiterer_moeglicher_weg_mehr_erlaubt;
+	true -> 
+	
+	%Alle Kanten zur Aktuellen ID beschaffen
+	Edges_List = graph_adt:getIncident(lists:nth(Index, Vertices_ID_List), Graph),
+	
+	%Grad vom Aktuellen Knoten ermittelt
+	Order_From_Current_Vertex = length(Edges_List),
+	
+	if ( Order_From_Current_Vertex > 0) ->
+		io:fwrite("New ID Found "), io:write(lists:nth(Index, Vertices_ID_List)), io:nl(),
+		%Legitime ID zurueck liefern
+		lists:nth(Index, Vertices_ID_List);
+	true -> 
+		searchNewStartVertex(Graph, Vertices_ID_List, Index + 1)
+	end
+	
+	end.
+	
+
 
 
 %Prueft ob der Graph, ein Euler Kreis enthaelt:  
