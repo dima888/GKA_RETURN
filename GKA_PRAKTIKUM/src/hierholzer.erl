@@ -192,7 +192,7 @@ createUnderCircleVerion_2(Graph, Random_Vertex_ID, Under_Graph_Vertices_ID, Unde
 	%TODO: Schauen was getann wird, wenn kein legitimer Weg mehr vorhanden ist
 	%Erstmal provisorisch!
 	if ( EdgesU =:= [] ) ->
-		   Graph;
+		   Under_Graph_Vertices_ID_Buffer;
 	true ->
 	
 	%Sich einen beliegen Weg (Kante) aussuchen, in unseren Fall immer mit den index 1
@@ -213,19 +213,18 @@ createUnderCircleVerion_2(Graph, Random_Vertex_ID, Under_Graph_Vertices_ID, Unde
 	
 	if ( Start_Vertex_ID =:= Current_Vertex_ID ) ->
 		   %TODO: 
-		   %Neue Startwerte ermitteln und
-		   %hier solange sich selbst auf rufen, bis wir alle Untergraphen haben
-
-		   Mod_U_G_V_G = Under_Graph_Vertices_ID_Buffer ++ [Modify_Under_Graph_Vertices_ID ++ [Start_Vertex_ID]],
+		   %Mod_U_G_V_G richtig zusammenbauen
+			
+		   %ID's eines Untergraphen
 		   Mod_U_G_V = Modify_Under_Graph_Vertices_ID ++ [Start_Vertex_ID],
 		   
+		   %Liste der Untergraphen verwalaten
+		   Mod_U_G_V_G = Under_Graph_Vertices_ID_Buffer ++ [Mod_U_G_V],
 		   
-		   %TODO: Hier richtig zusammen bauen, startVertex muss sich auch anpassen
-		   %io:write(Mod_U_G_V), io:nl(), io:write( Mod_U_G_V_G), io:nl(),
-		   %[ Under_Graph_Vertices_ID_Buffer ++ [Modify_Under_Graph_Vertices_ID ++ [Start_Vertex_ID]], Modify_Not_Allowed_Edges ];
-		   %Next_Legitim_Vertex_ID = searchNewStartVertex(Modify_Graph, Mod_U_G_V, 1),
-		   [ Modify_Graph, Under_Graph_Vertices_ID_Buffer ++ [Modify_Under_Graph_Vertices_ID ++ [Start_Vertex_ID]] , Mod_U_G_V];
-		   %createUnderCircleVerion_2(Modify_Graph, Next_Legitim_Vertex_ID, Modify_Under_Graph_Vertices_ID, Under_Graph_Vertices_ID_Buffer, Start_Vertex_ID);
+		   %io:write(Mod_U_G_V), io:nl(),
+		   
+		   Next_Legitim_Vertex_ID = searchNewStartVertex(Modify_Graph, Mod_U_G_V, 1),
+		   createUnderCircleVerion_2(Modify_Graph, Next_Legitim_Vertex_ID, [], Mod_U_G_V_G, Next_Legitim_Vertex_ID);
 	true ->
 		createUnderCircleVerion_2(Modify_Graph, Current_Vertex_ID, Modify_Under_Graph_Vertices_ID, Under_Graph_Vertices_ID_Buffer, Start_Vertex_ID) 
 		
@@ -236,8 +235,6 @@ createUnderCircleVerion_2(Graph, Random_Vertex_ID, Under_Graph_Vertices_ID, Unde
 %%4. Am ersten Eckpunkt von K, dessen Grad größer 0 ist, lässt man nun einen weiteren Unterkreis K' entstehen, der keine Kante in K durchläuft
 %%   und keine Kante in G zweimal enthält.
 searchNewStartVertex(Graph, Vertices_ID_List, Index) ->
-	
-	io:write(lists:nth(Index, Vertices_ID_List)), io:nl(), io:fwrite("----"), io:nl(),
 	
 	%Abbruchbedinung
 	if ( Index > length(Vertices_ID_List) ) -> 
@@ -251,7 +248,6 @@ searchNewStartVertex(Graph, Vertices_ID_List, Index) ->
 	Order_From_Current_Vertex = length(Edges_List),
 	
 	if ( Order_From_Current_Vertex > 0) ->
-		io:fwrite("New ID Found "), io:write(lists:nth(Index, Vertices_ID_List)), io:nl(),
 		%Legitime ID zurueck liefern
 		lists:nth(Index, Vertices_ID_List);
 	true -> 
