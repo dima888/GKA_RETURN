@@ -20,7 +20,7 @@
 
 %% Definition 5.1 (Eulertour und Eulerpfad)
 %% * Eine geschlossene Kantenfolge, die jede Kante eines Graphen genau einmal
-%% enth‰lt, heiﬂt eine Eulertour.
+%% 	 enth‰lt, heiﬂt eine Eulertour.
 
 %% * Ein Graph, der eine Eulertour besitzt, heiﬂt ein eulerscher Graph.
 
@@ -36,6 +36,19 @@
 %%   zwei Ecken einen ungeraden Grad besitzen. Diese beiden Ecken sind die
 %%   erste und die letzte Ecke des Eulerpfads.
 %%-------Quelle: GRBuch Seite 117------------
+
+
+%Definition 4.1. Es sei G = (V, E) ein Graph.
+%	* Ein Weg, der jede Kante von G genau einmal
+%	  enthaelt, heiﬂt eulerscher Weg von G.
+
+%	* Ein Kreis, der jede Kante von G genau einmal
+%	  enthaelt, heiﬂt eulerscher Kreis von G.
+
+%	* G heiﬂt eulersch gdw. G einen eulerschen Kreis
+%--------Quelle: HS Bonn  Reihn Sieg ----------
+
+
 
 %% @doc @todo Add description to hierholzer.
 
@@ -57,7 +70,7 @@
 %Graph = graph_parser:importGraph("c:\\users\\foxhound\\desktop\\bellman.txt", "cost").
 
 %Graph = graph_parser:importGraph("c:\\users\\foxhound\\desktop\\wiki.txt", "cost").
-%M1 = hierholzer:createUnderCircleVerion_2(Graph, 1, [], [], 1).
+%M1 = hierholzer:createUnderCircleVerion_2(Graph, 1, [], [], 1, Graph, []).
 %M2 = hierholzer:createUnderCircleVerion_2(lists:nth(1, M1), 1, [], lists:nth(2, M1), 1).
 %M3 = hierholzer:createUnderCircleVerion_2(lists:nth(1, M2), 6, [], lists:nth(2, M2), 6).
 
@@ -149,7 +162,7 @@ createUnderCircle(Graph, Random_Vertex_ID, Not_Allowed_Edges, Under_Graph_Vertic
 	Legitim_Edges = [ X || X <- Edges_List, (not lists:member(X, Not_Allowed_Edges)) ],
 	
 	%TODO: Schauen was getann wird, wenn kein legitimer Weg mehr vorhanden ist
-	
+	%unwichtig, da diese Methode nicht mehr benutzt wird
 	
 	%Sich einen beliegen Weg (Kante) aussuchen, in unseren Fall immer mit den index 1
 	Using_Edge = lists:nth(1, Legitim_Edges),
@@ -179,7 +192,7 @@ createUnderCircle(Graph, Random_Vertex_ID, Not_Allowed_Edges, Under_Graph_Vertic
 		
 	end.
 
-createUnderCircleVerion_2(Graph, Random_Vertex_ID, Under_Graph_Vertices_ID, Under_Graph_Vertices_ID_Buffer, Start_Vertex_ID) ->
+createUnderCircleVerion_2(Graph, Random_Vertex_ID, Under_Graph_Vertices_ID, Under_Graph_Vertices_ID_Buffer, Start_Vertex_ID, Final_Graph, Edges_From_Under_Graph) ->
 	{ Vertices, EdgesD, EdgesU } = Graph,
 	%Random_Vertex_ID ist ein beliebiger Knoten aus Graph
 
@@ -198,6 +211,9 @@ createUnderCircleVerion_2(Graph, Random_Vertex_ID, Under_Graph_Vertices_ID, Unde
 	%Sich einen beliegen Weg (Kante) aussuchen, in unseren Fall immer mit den index 1
 	Using_Edge = lists:nth(1, Edges_List),
 	
+	%Diese Kante vom Untergraphen abspeichern, brauchen wir zum vergleich, ob Untergraph ein Eulerkreis ist
+	Modify_Edges_From_Under_Graph = Edges_From_Under_Graph ++ Using_Edge,
+	
 	%Jetzt wollen wir den Aktuellen Knoten ermitteln, an den wir von Random_Vertexx_ID angekommen sind
 	%Source oder Target ist jetzt das Aktuelle Element (Vertex ID)
 	Source_Vertex_ID = element(1, lists:nth(2, Using_Edge)),
@@ -212,8 +228,6 @@ createUnderCircleVerion_2(Graph, Random_Vertex_ID, Under_Graph_Vertices_ID, Unde
 	Current_Vertex_ID = lists:nth(1, [ X || X <- Source_Target_List, X =/= Random_Vertex_ID] ),
 	
 	if ( Start_Vertex_ID =:= Current_Vertex_ID ) ->
-		   %TODO: 
-		   %Mod_U_G_V_G richtig zusammenbauen
 			
 		   %ID's eines Untergraphen
 		   Mod_U_G_V = Modify_Under_Graph_Vertices_ID ++ [Start_Vertex_ID],
@@ -221,12 +235,21 @@ createUnderCircleVerion_2(Graph, Random_Vertex_ID, Under_Graph_Vertices_ID, Unde
 		   %Liste der Untergraphen verwalaten
 		   Mod_U_G_V_G = Under_Graph_Vertices_ID_Buffer ++ [Mod_U_G_V],
 		   
-		   %io:write(Mod_U_G_V), io:nl(),
-		   
+		   %Neue Start ID fuer K' ermitteln
 		   Next_Legitim_Vertex_ID = searchNewStartVertex(Modify_Graph, Mod_U_G_V, 1),
-		   createUnderCircleVerion_2(Modify_Graph, Next_Legitim_Vertex_ID, [], Mod_U_G_V_G, Next_Legitim_Vertex_ID);
+		   
+		   Is_Euler_Circle = hierholzer:isEulerCircle(Final_Graph, Modify_Edges_From_Under_Graph),
+		   
+		   %TODO: Schauen ob der Untergraph ein Eulerkreis ist: Punkt2
+		   if ( Is_Euler_Circle =:= true) ->
+				  eulerkreis_im_untergraph_entdeckt;
+		   true -> 
+		   
+		   %Erster Untergraph wurde erstellt, fahre mit einen neuen K' von K oder K' fort
+		   createUnderCircleVerion_2(Modify_Graph, Next_Legitim_Vertex_ID, [], Mod_U_G_V_G, Next_Legitim_Vertex_ID, Final_Graph, [])
+		   end;
 	true ->
-		createUnderCircleVerion_2(Modify_Graph, Current_Vertex_ID, Modify_Under_Graph_Vertices_ID, Under_Graph_Vertices_ID_Buffer, Start_Vertex_ID) 
+		createUnderCircleVerion_2(Modify_Graph, Current_Vertex_ID, Modify_Under_Graph_Vertices_ID, Under_Graph_Vertices_ID_Buffer, Start_Vertex_ID, Final_Graph, Modify_Edges_From_Under_Graph) 
 		
 	end
 	
@@ -258,11 +281,96 @@ searchNewStartVertex(Graph, Vertices_ID_List, Index) ->
 	
 
 
-
-%Prueft ob der Graph, ein Euler Kreis enthaelt:  
+%TODO: Der ist Zurzeit nur fuer Ungerichtet verwendbar
 %2. Wenn K ein Eulerkreis ist, breche ab. Andernfalls:
-isEulerCircle(Graph) -> 
+%Definition: 
+%	* Ein Kreis, der jede Kante von G genau einmal
+%	  enthaelt, heiﬂt eulerscher Kreis von G.
+isEulerCircle(Graph, Under_Graph_Edges_List) -> 
+	{ Vertices, EdgesD, EdgesU } = Graph,
+	
+	%Wir vergleichen die Kanten von Untergraph mit den Kanten von Obergraph,
+	%wenn die beide gleich sind, haben wir einen Eulerkreis und liefern true zureuck, sonst false
+	
+	if ( EdgesU =:= Under_Graph_Edges_List) ->
+		   true;
+	true -> false
+	
+	end.
+	
+%5. F¸ge in K den zweiten Kreis K' ein, indem der Startpunkt von K' durch alle 
+%	Punkte von K' in der richtigen Reihenfolge ersetzt wird.
+buildEulertour(Under_Graph_Vertices_ID_Buffer) ->
+	
+	buildEulertour(Under_Graph_Vertices_ID_Buffer, length(Under_Graph_Vertices_ID_Buffer), []).
+	
+buildEulertour(Under_Graph_Vertices_ID_Buffer, Index, Eulertour_ID_List_Buffer) -> 
 
-	C = 25.
+	%Abbruchbedingung
+	if ( Index =< 1 ) ->
+		   lists:flatten(Eulertour_ID_List_Buffer);
+	true ->
+	
+	%Laufe von hinten durch die Under_Graph_Vertices_ID_Buffer und Klebe die die durchlaufen ID's der Untergraphen
+	%laut Punkt 5 des Algorithmus zusammen in Eulertour_ID_List_Buffer
+
+	%Die letzte Liste hollen
+	Current_List = lists:nth(Index, Under_Graph_Vertices_ID_Buffer),
+
+	%Die vorletzte Liste hollen
+	Current_List_sub_1 = lists:nth(Index - 1, Under_Graph_Vertices_ID_Buffer),
+	
+	
+	
+	endeMendeGelende
+	end.
+
+%Ueber die erste Liste Iterieren und abgleichen mit ersten Element der zweiten Liste
+concat(List_1, Index_1, List_2, Result) ->
+	
+	%Abbruchbedingung 
+	End = length(List_1),
+	
+	if ( End =< 0) -> 
+		   Result = List_1 ++ List_2;
+	true ->
+	
+	Elem = lists:nth(Index_1, List_1),
+	Elem_Static = lists:nth(1, List_2),
+	
+	if ( Elem =:= Elem_Static) ->
+		concat(List_1, Index_1 + 1, "Darf nicht mehr benutzt werden", Result ++ List_2);
+	true ->
+		%Elemente einfach ins Result umkopieren
+		concat(List_1, Index_1 + 1, List_2, Result ++[Elem])
+	end
+	
+	end.
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
 
 
