@@ -33,7 +33,9 @@
 
 %Initialisiert die Distanz und Transit Matix
 
-%Graph = graph_parser:importGraph("c:\\users\\foxhound\\desktop\\floyd.txt", "cost")
+%Graph = graph_parser:importGraph("c:\\users\\foxhound\\desktop\\floyd.txt", "cost").
+%Graph = graph_parser:importGraph("c:\\users\\foxhound\\desktop\\graph8.txt", "cost").
+%Graph = graph_parser:importGraph("c:\\users\\foxhound\\desktop\\graph2.txt", "cost").
 %Nur diese Methode soll aufgerufen werden
 startAlgorithm(Graph, Source_ID, Target_ID) ->
 	{ Vertices, EdgesD, EdgesU } = Graph,
@@ -64,8 +66,9 @@ startAlgorithm(Graph, Source_ID, Target_ID) ->
 	Modify_Graph_2 = { erlang:element(1, Modify_Graph), [], erlang:element(3, Modify_Graph) },
 	
 	%Result
-	io:fwrite("Zugriffe auf den Graph: "), io:write(1), io:fwrite(" || Optimale Route: "),
-	lists:nth(Index_Of_Target_ID, lists:nth(Index_Of_Source_ID, Distance_Matrix));
+	%io:fwrite("Zugriffe auf den Graph: "), io:write(1), io:fwrite(" || Optimale Route: "),
+	lists:nth(Index_Of_Target_ID, lists:nth(Index_Of_Source_ID, Distance_Matrix)),
+	Transit_Matrix = lists:nth(2, Result_Distance_Transit_Matrix);
 	true ->
 
 		%------------ DER FALL FUER GERICHTETEN GRAPHEN ------------
@@ -86,8 +89,12 @@ startAlgorithm(Graph, Source_ID, Target_ID) ->
 	Index_Of_Target_ID = index_of(Target_ID, VerticesList),
 	
 	%Result
-	io:fwrite("Zugriffe auf den Graph: "), io:write(1), io:fwrite(" || Optimale Route: "),
-	lists:nth(Index_Of_Target_ID, lists:nth(Index_Of_Source_ID, Distance_Matrix))
+	%io:fwrite("Zugriffe auf den Graph: "), io:write(1), io:fwrite(" || Optimale Route: "),
+	lists:nth(Index_Of_Target_ID, lists:nth(Index_Of_Source_ID, Distance_Matrix)),
+
+	%TODO hier evtl anpassen
+	%Result -> Die Distance zwischen Zwei Knoten
+	Transit_Matrix = lists:nth(2, Result_Distance_Transit_Matrix)
 	end.
 
 
@@ -251,6 +258,40 @@ lowLevel(Distance_Matrix, Transit_Matrix, J, I, K) ->
 		   lowLevel(Distance_Matrix, Transit_Matrix, J, I, K + 1)
 	end
 end.
+
+%Die Methode die aufgerufen wird
+showWayFromTransitMatrix(Graph, Source_ID, Target_ID) ->
+	
+	Tran = floyd_warshall:startAlgorithm(Graph, Source_ID, Target_ID),
+	io:write(Tran), io:nl(),
+	Running_Way = [Target_ID],
+	
+	VerticesList = graph_adt:getVertexes(Graph),
+	
+	%Von den IDs die Indizes herausfinden
+	I = index_of(Source_ID, VerticesList),
+	J = index_of(Target_ID, VerticesList),
+	
+	showWayFromTransitMatrix(I, J, Source_ID, Tran, Running_Way, Graph).
+	
+showWayFromTransitMatrix(I, J, Source_ID, Transit_Matrix, Running_Way, Graph) -> 
+	
+	VerticesList = graph_adt:getVertexes(Graph),
+	%io:fwrite("I = "), io:write(I), io:nl(), io:fwrite("J = "), io:write(J), io:nl(),
+	
+	%Zugriff auf die Transit Matrix mit Source und Target ID
+
+	%Wenn das Element Null ist, dann haben wir unseren Weg schon rekonstruiert
+	Elem_I_J = lists:nth(J, lists:nth(I, Transit_Matrix)),
+
+	%Abbruchbedingung
+	if ( Elem_I_J == 0) ->
+		   R = Running_Way ++ [Source_ID], %TODO, hier muss source id rein
+		   lists:reverse(R);
+	true -> 
+		showWayFromTransitMatrix(I, Elem_I_J, Source_ID, Transit_Matrix, Running_Way ++ [lists:nth(Elem_I_J, VerticesList)], Graph)
+	end.
+	
 
 %----------------------------- HILFSMETHODEN -----------------------------
 %QUELLE: stackoverflow.com/questions/1459152/erlang-listsindex-of-function

@@ -418,9 +418,15 @@ constUndirektedImport(Datei, Graph, V_ID1, V_ID2, Device, Count) ->
 	TargetValName = lists:nth(2, PartGraph),
 	CoustVal = lists:nth(3, PartGraph),
 
+	io:fwrite("~p~n", [SourceValName]), io:nl(),
+	io:fwrite("~p~n", [TargetValName]), io:nl(),
+	
 	%Hier kommen die Pruefungen ob die IDs in den Graphen rein duerfen TODO: Keine Ahnung ob ich das noch brauche
 	BoolValVertexFirst = graph_adt:includeValue(SourceValName, Graph),
 	BoolValVertexSecond = graph_adt:includeValue(TargetValName, Graph),
+	
+	io:write(BoolValVertexFirst), io:nl(),
+	io:write(BoolValVertexSecond), io:nl(),
 	
 	if ( (BoolValVertexFirst  == true) and (BoolValVertexSecond == true)  ) -> 
 		   %TODO: Lesen und beraten, gegebenfalls in der Vorlesung ansprechen ob wir diesen Fall wirklich benoetigen
@@ -470,11 +476,11 @@ constUndirektedImport(Datei, Graph, V_ID1, V_ID2, Device, Count) ->
 		   %Vertex an erster Stelle in .graph hinzu fuegen
 		   ModifyGraph = graph_adt:addVertex(V_ID1, Graph),
 		   
-		   	%Dem Vertex das Attribut hinzu kleben
-			ModifyGraph_2 = graph_adt:setValV(V_ID1, name, TargetValName, ModifyGraph),
+		   	%Dem Vertex das Attribut hinzu kleben 
+			ModifyGraph_2 = graph_adt:setValV(V_ID1, name, SourceValName, ModifyGraph),
 		   
-		   	%Die schon vorhandene ID ausgraben
-			Buffer = graph_adt:getIDFromAttrValue(TargetValName, ModifyGraph_2),
+		   	%Die schon vorhandene ID ausgraben 
+			Buffer = graph_adt:getIDFromAttrValue(SourceValName, ModifyGraph_2),
 			ExistingID = lists:nth(1, Buffer),
 		   
 		   %Kante hinzu fuegen

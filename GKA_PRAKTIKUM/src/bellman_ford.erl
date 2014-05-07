@@ -37,7 +37,11 @@
 %% Internal functions
 %% ====================================================================
 
-%Graph = graph_parser:importGraph("c:\\users\\foxhound\\desktop\\bellman.txt", "cost"). 
+%Graph = graph_parser:importGraph("c:\\users\\foxhound\\desktop\\bellman.txt", "cost").
+%Graph = graph_parser:importGraph("c:\\users\\foxhound\\desktop\\bellmanT.txt", "cost").
+%Graph = graph_parser:importGraph("c:\\users\\foxhound\\desktop\\floyd.txt", "cost").
+%Graph = graph_parser:importGraph("c:\\users\\foxhound\\desktop\\graph8.txt", "cost").   
+
 % --------------------------------------- HAUPT METHODE --------------------------------------
 startAlgorithm(Graph, SourceID, TargetID) ->
 	{ Vertices, EdgesD, EdgesU } = Graph,

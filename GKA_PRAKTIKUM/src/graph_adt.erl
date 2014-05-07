@@ -394,7 +394,8 @@ getEdges(Graph) ->
 includeValue(Val, Graph) ->
 	{Vertices, EdgeD, EdgeU} = Graph,
 	Attributs = getAttrAndValVertex(Vertices, []),
-	Value = [X || X <- Attributs, lists:nth(2, X) == Val],
+	io:fwrite("~p~n", [Attributs]), io:nl(), io:fwrite("~p~n", [Val]), io:nl(),
+	Value = [X || X <- Attributs, lists:nth(2, X) =:= Val],
 	
 	if
 		Value == [] -> false;
