@@ -1,9 +1,9 @@
 % cd("//Users//Flah//Dropbox//WorkSpace//GKA_RETURN//GKA_PRAKTIKUM//src").
-% c(flussProbleme).
-% G = graph_parser:importGraph("//Users//Flah//Desktop//shit.txt", "maxis").
-% G1 = flussProbleme:fordFulkerson(G).
+% c(fordFulkerson).
+% G = graph_parser:importGraph("//Users//Flah//Dropbox//WorkSpace//GKA_RETURN//GKA_PRAKTIKUM//fhwedel.txt", "maxis").
+% G1 = fordFulkerson:fordFulkerson(G).
 
--module(flussProbleme).
+-module(fordFulkerson).
 
 %% ====================================================================
 %% API functions
@@ -17,21 +17,21 @@
 
 fordFulkerson(Graph) ->
 	% Initialisierung durchführen und zu Schritt 2 gehen
-	schritt2(schritt1(Graph)).
+	step2(step1(Graph)).
 
 % Schritt 1 - Initialisierung des Flusses mit 0 für jede Kante
 % Quelle q Markieren mit (undefiniert, ∞)
-schritt1(Graph) -> 
+step1(Graph) -> 
 	SourceVertex = [X || X <- element(1, Graph), graph_adt:getValV(lists:nth(2, X), name, Graph) == "q"],
 	graph_adt:setValV(lists:nth(2, lists:nth(1, SourceVertex)), marked, {"undefined", "100000"}, initialisierung(Graph, [])).
 
 % Schritt 2 - Inspektion und Markierung
-schritt2(Graph) ->
+step2(Graph) ->
 	% Schritt 2A - Falls alle markierten Knoten inspiziert wurden, gehe zu Schritt 4
 	AllMarkedVerticesInspected = areAllMarkedVerticesInspected(Graph, element(1, Graph), []),
 	
 	if
-		 AllMarkedVerticesInspected == true -> schritt4(Graph); % Springe zu Schritt 4
+		 AllMarkedVerticesInspected == true -> step4(Graph); % Springe zu Schritt 4
 			   						   true -> % Schritt 2B - Wähle eine beliebig markierte, aber noch NICHT inspizierte Ecke vi und
 											   % inspiziere sie wie folgt (Berechnung des Inkrements)
 											   %	•(Vorwärtskante) Für jede Kante eij € O(vi) mit unmarkierterm Knoten vj und 
@@ -40,45 +40,55 @@ schritt2(Graph) ->
 											   %	•(Rückwärtskante) Für jede Kante eij € I(vi) mit unmarkiertem Knoten vj und
 											   %	 f(eij) > 0 markiere vj mit (-v, δj), wobei δj die kleinere der beiden Zahlen
 											   %	 f(eij) und δi ist
-											   io:nl(), io:fwrite("Vor dem markieren!"), io:nl(),
-											   print(Graph),
-											   timer:sleep(1000),
+											   
+											   %io:nl(), io:fwrite("Vor dem markieren!"), io:nl(),
+											   %print(Graph),
+											   %timer:sleep(1000),
 											   AlleMarkedVertices = [X || X <- element(1, Graph), (graph_adt:getValV(lists:nth(2, X), marked, Graph) =/= {"nil", "nil"}) and (graph_adt:getValV(lists:nth(2, X), inspected, Graph) == "false")],
 											   ArbitraryMarkedVertex = lists:nth(1, AlleMarkedVertices),
 											   NewMarkedGraph = forwardEdges(ArbitraryMarkedVertex, backwardEdges(ArbitraryMarkedVertex, graph_adt:setValV(lists:nth(2, ArbitraryMarkedVertex), inspected, "true", Graph))),
-											   io:nl(), io:fwrite("Nach dem markieren!"), io:nl(),
-											   print(NewMarkedGraph),
-											   timer:sleep(1000),
+											   %io:nl(), io:fwrite("Nach dem markieren!"), io:nl(),
+											   %print(NewMarkedGraph),
+											   %timer:sleep(1000),
 
 											   % Schritt 2C - Falls die Senke markiert ist, gehe zu Schritt 3, sonst zu 2A
 											   Target = [X || X <- element(1, NewMarkedGraph), graph_adt:getValV(lists:nth(2, X), name, NewMarkedGraph) == "s"],
 											   TargetMarked = graph_adt:getValV(lists:nth(2, lists:nth(1, Target)), marked, NewMarkedGraph),
 
 											   if
-													TargetMarked =/= {"nil", "nil"} -> schritt3(NewMarkedGraph); % gehe zu Schritt 3
-						  											 		   true -> schritt2(NewMarkedGraph)  % gehe zu Schritt 2A
+													TargetMarked =/= {"nil", "nil"} -> step3(NewMarkedGraph); % gehe zu Schritt 3
+						  											 		   true -> step2(NewMarkedGraph)  % gehe zu Schritt 2A
 											   end
 	end.
 
 % Schritt 3 - Vergößerung der Flußstärke
-schritt3(Graph) ->
+step3(Graph) ->
 	% Bei s beginnend lässt sich anhand der Markierungen der gefundene vergrößernde Weg bis
 	% zum Knoten q rückwärts durchlaufen. Für jede Vorwärtskante wird f(eij) um δs erhöht und
 	% für jede Rückwärtskante wird f(eij) um δs vermindert. Anschließend werden bei allen
 	% Knoten mit Ausnahme von q die Markierungen entfernt. Danach wieder zu Schritt 2A
-	io:fwrite("------- SCHRITT 3 ---------"),
+	
+	%io:fwrite("------- SCHRITT 3 ---------"),
 	Target = [X || X <- element(1, Graph), graph_adt:getValV(lists:nth(2, X), name, Graph) == "s"],
 	FoundPath = findPath([Target], Graph),
 	ReversedPath = lists:reverse(FoundPath),
 	NewFlow = setFlow(ReversedPath, Graph),
-	schritt2(resetMarksAndInspected(element(1, NewFlow), NewFlow)).
+	step2(resetMarksAndInspected(element(1, NewFlow), NewFlow)).
 
 % Schritt 4 - Es gibt keinen vergrößernden Weg
-schritt4(Graph) ->
+step4(Graph) ->
 	% Der jetzige Weg von d ist optimal. Ein Schnitt A(X, Komplement(X)) mit c(X, Komplement(X)) = d
 	% wird gebildet von genau denjenigen Kanten, bei denen entweder der Anfangsknoten oder der
 	% Endknoten inspiziert ist
-	io:fwrite("------- SCHRITT 4 ---------"),
+	
+	%io:fwrite("------- SCHRITT 4 ---------\n"),
+	Source = lists:nth(1, [X || X <- element(1, Graph), graph_adt:getValV(lists:nth(2, X), name, Graph) == "q"]),
+	SourceAdjacentVertices = graph_adt:getAdjacent(lists:nth(2, Source), Graph),
+	SourceAdjacentVerticesIDs = [element(2, X) || X <- SourceAdjacentVertices],
+	SourceEdges = [X || X <- element(2, Graph), Y <- SourceAdjacentVerticesIDs, lists:nth(2, X) == {lists:nth(2, Source), Y}],
+	Flows = [list_to_integer(element(2, graph_adt:getValE(lists:nth(2, X), maxis, Graph))) || X <- SourceEdges],
+	MaximumFlow = lists:sum(Flows),
+	io:fwrite("MaximumFlow: "), io:write(MaximumFlow), io:nl(), io:nl(),
 	Graph.
 %%================================================================================================================
 %% 												HILFSMETHODEN	
@@ -160,11 +170,11 @@ backwardEdges(ArbitraryMarkedVertex, Graph) ->
 	AdjacentVertices = graph_adt:getAdjacent(ID, Graph),
 	BackwardVerticesIDsThatAreNotMarked = [element(2, X) || X <- AdjacentVertices, ((element(1, X) == s) and (graph_adt:getValV(element(2, X), marked, Graph) == {"nil", "nil"}))],
 	BackwardVertices = [X || X <- element(1, Graph), Y <- BackwardVerticesIDsThatAreNotMarked, lists:nth(2, X) == Y],
-	io:fwrite("BackwardVertices: "), erlang:display(BackwardVertices),
+	%io:fwrite("BackwardVertices: "), erlang:display(BackwardVertices),
 	%BackwardVerticesWithFreeSpace = [X || X <- BackwardVertices, (list_to_integer(element(2, graph_adt:getValE({ID, lists:nth(2, X)}, maxis, Graph)) > 0))],
 	markBackwardVertices(ArbitraryMarkedVertex, BackwardVertices, Graph).
 
-% Markiert die Vertices für die die Bedingungen zu treffen aus forwardEdges *** FEHLER HIER WERDEN AUCH VERTICES MARKIERT OBWOHL SIE ES NICHT DÜRFTEN !!! FALLS DER FLUSS DER KANTE NICHTS MEHR ZULÄSST, DARF AUCH KEIN VERTEX VON DEM ZURZEIT INSPIZIERTEN MEHR MARKIERT WERDEN !!! ES KOMMT ZURZEIT ZU SOWAS: {"+v2", "0"} ALSO DAS MAN MIT 0 ÜBRIG GEBLIEBENER KAPAZITÄT MARKIERT WURDE !!!
+% Markiert die Vertices für die die Bedingungen zu treffen aus forwardEdges
 markForwardVertices(ArbitraryMarkedVertex, [], Graph) ->
 	Graph;
 markForwardVertices(ArbitraryMarkedVertex, [H|T], Graph) ->
@@ -182,7 +192,7 @@ markBackwardVertices(ArbitraryMarkedVertex, [], Graph) ->
 	Graph;
 markBackwardVertices(ArbitraryMarkedVertex, [H|T], Graph) ->
 	Maxis = graph_adt:getValE({lists:nth(2, H), lists:nth(2, ArbitraryMarkedVertex)}, maxis, Graph),
-	io:fwrite("Maxis: "), erlang:display(Maxis), io:nl(),
+	%io:fwrite("Maxis: "), erlang:display(Maxis), io:nl(),
 	Flow = list_to_integer(element(2, Maxis)),
 
 	if
@@ -206,7 +216,7 @@ setFlow([], Graph) ->
 	Graph;
 setFlow([H|T], Graph) ->
 	Forward = 43, % Steht für + in Dezimal für ASCII
-	Backward = 46, % Steht für - in Dezimal für ASCII
+	Backward = 45, % Steht für - in Dezimal für ASCII
 	Target = [X || X <- element(1, Graph), graph_adt:getValV(lists:nth(2, X), name, Graph) == "s"],
 	TargetFlowAsInt = list_to_integer(element(2, graph_adt:getValV(lists:nth(2, lists:nth(1, Target)), marked, Graph))),
 	AttrMarkedValue = graph_adt:getValV(lists:nth(2, lists:nth(1, H)), marked, Graph),
@@ -218,7 +228,7 @@ setFlow([H|T], Graph) ->
 							 ID = lists:nth(2, lists:nth(1, H)),
 							 if
 		 						 ForwardOrBackward == Forward -> setFlow(T, graph_adt:setValE({IDPredecessor, ID}, maxis, {element(1, graph_adt:getValE({IDPredecessor, ID}, maxis, Graph)), integer_to_list((list_to_integer((element(2, graph_adt:getValE({IDPredecessor, ID}, maxis, Graph)))) + TargetFlowAsInt))}, Graph));
-								ForwardOrBackward == Backward -> setFlow(T, graph_adt:setValE({ID, IDPredecessor}, maxis, {element(1, graph_adt:getValE({ID, IDPredecessor}, maxis, Graph)), list_to_integer((element(2, graph_adt:getValE({ID, IDPredecessor}, maxis, Graph))) - TargetFlowAsInt)}, Graph));
+								ForwardOrBackward == Backward -> setFlow(T, graph_adt:setValE({ID, IDPredecessor}, maxis, {element(1, graph_adt:getValE({ID, IDPredecessor}, maxis, Graph)), integer_to_list(list_to_integer(element(2, graph_adt:getValE({ID, IDPredecessor}, maxis, Graph))) - TargetFlowAsInt)}, Graph));
 														 true -> io:fwrite("WEDER + noch - !!!!!!!!")
 							 end
 	end.
@@ -230,7 +240,7 @@ resetMarksAndInspected([H|T], Graph) ->
 	VertexName = graph_adt:getValV(lists:nth(2, H), name, Graph),
 	if
 		VertexName =/= "q" -> resetMarksAndInspected(T, graph_adt:setValV(lists:nth(2, H), marked, {"nil", "nil"}, (graph_adt:setValV(lists:nth(2, H), inspected, "false", Graph))));
-					  true -> resetMarksAndInspected(T, graph_adt:setValV(lists:nth(2, H), inspected, "false", Graph)) %********** MUSS Q WIRKLICH WIEDER GELÖSCHT WERDEN ???? **********
+					  true -> resetMarksAndInspected(T, graph_adt:setValV(lists:nth(2, H), inspected, "false", Graph))
 	end.
 
 % Zeigt den Graphen an
