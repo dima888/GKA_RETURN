@@ -12,7 +12,6 @@
 %% ====================================================================
 %% Internal functions
 %% ====================================================================
-%TODO: FilePath verlagern || FilePath = Datei
 importGraph(Datei, Attr) -> 
 	if Attr == "cost" -> 
 		   costImport(Datei);
@@ -71,12 +70,11 @@ maxisDirektedImport(Datei, Graph, V_ID1, V_ID2, Device, Count) ->
 	CoustVal = lists:nth(3, PartGraph),
 	MaxisVal = lists:nth(4, PartGraph),
 
-	%Hier kommen die Pruefungen ob die IDs in den Graphen rein duerfen TODO: Keine Ahnung ob ich das noch brauche
+	%Hier kommen die Pruefungen ob die IDs in den Graphen rein duerfen 
 	BoolValVertexFirst = graph_adt:includeValue(SourceValName, Graph),
 	BoolValVertexSecond = graph_adt:includeValue(TargetValName, Graph),
 	
 	if ( (BoolValVertexFirst  == true) and (BoolValVertexSecond == true)  ) -> 
-		   %TODO: Lesen und beraten, gegebenfalls in der Vorlesung ansprechen ob wir diesen Fall wirklich benoetigen
 		   %in diesen Fall packt er ein und die gleiche Kante doppeln rein. Deshalb behandele ich diesen Fall erstmal nicht!
 	
 		   %Die schon vorhandene ID ausgraben	
@@ -188,12 +186,11 @@ maxisUndirektedImport(Datei, Graph, V_ID1, V_ID2, Device, Count) ->
 	CoustVal = lists:nth(3, PartGraph),
 	MaxisVal = lists:nth(4, PartGraph),
 
-	%Hier kommen die Pruefungen ob die IDs in den Graphen rein duerfen TODO: Keine Ahnung ob ich das noch brauche
+	%Hier kommen die Pruefungen ob die IDs in den Graphen rein duerfen 
 	BoolValVertexFirst = graph_adt:includeValue(SourceValName, Graph),
 	BoolValVertexSecond = graph_adt:includeValue(TargetValName, Graph),
 	
 	if ( (BoolValVertexFirst  == true) and (BoolValVertexSecond == true)  ) -> 
-		   %TODO: Lesen und beraten, gegebenfalls in der Vorlesung ansprechen ob wir diesen Fall wirklich benoetigen
 		   %in diesen Fall packt er ein und die gleiche Kante doppeln rein. Deshalb behandele ich diesen Fall erstmal nicht!
 	
 		   %Die schon vorhandene ID ausgraben
@@ -307,12 +304,11 @@ costDirektedImport(Datei, Graph, V_ID1, V_ID2, Device, Count) ->
 	TargetValName = lists:nth(2, PartGraph),
 	CoustVal = lists:nth(3, PartGraph),
 
-	%Hier kommen die Pruefungen ob die IDs in den Graphen rein duerfen TODO: Keine Ahnung ob ich das noch brauche
+	%Hier kommen die Pruefungen ob die IDs in den Graphen rein duerfen 
 	BoolValVertexFirst = graph_adt:includeValue(SourceValName, Graph),
 	BoolValVertexSecond = graph_adt:includeValue(TargetValName, Graph),
 	
 	if ( (BoolValVertexFirst  == true) and (BoolValVertexSecond == true)  ) -> 
-		   %TODO: Lesen und beraten, gegebenfalls in der Vorlesung ansprechen ob wir diesen Fall wirklich benoetigen
 		   %in diesen Fall packt er ein und die gleiche Kante doppeln rein. Deshalb behandele ich diesen Fall erstmal nicht!
 	
 		   %Die schon vorhandene ID ausgraben
@@ -417,19 +413,12 @@ constUndirektedImport(Datei, Graph, V_ID1, V_ID2, Device, Count) ->
 	SourceValName = lists:nth(1, PartGraph),
 	TargetValName = lists:nth(2, PartGraph),
 	CoustVal = lists:nth(3, PartGraph),
-
-	io:fwrite("~p~n", [SourceValName]), io:nl(),
-	io:fwrite("~p~n", [TargetValName]), io:nl(),
 	
-	%Hier kommen die Pruefungen ob die IDs in den Graphen rein duerfen TODO: Keine Ahnung ob ich das noch brauche
+	%Hier kommen die Pruefungen ob die IDs in den Graphen rein duerfen 
 	BoolValVertexFirst = graph_adt:includeValue(SourceValName, Graph),
 	BoolValVertexSecond = graph_adt:includeValue(TargetValName, Graph),
 	
-	io:write(BoolValVertexFirst), io:nl(),
-	io:write(BoolValVertexSecond), io:nl(),
-	
-	if ( (BoolValVertexFirst  == true) and (BoolValVertexSecond == true)  ) -> 
-		   %TODO: Lesen und beraten, gegebenfalls in der Vorlesung ansprechen ob wir diesen Fall wirklich benoetigen
+	if ( (BoolValVertexFirst  == true) and (BoolValVertexSecond == true)  ) -> 		  
 		   %in diesen Fall packt er ein und die gleiche Kante doppeln rein. Deshalb behandele ich diesen Fall erstmal nicht!
 	
 		   %Die schon vorhandene ID ausgraben

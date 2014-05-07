@@ -5,4 +5,4 @@ Anleitung zum Bellman & Ford, sowie Floyd & Warshall
    oder den Graph selber mit der graph_adt.erl erstellen. 
 
 2) Auf bellman_ford.erl oder floyd_warshall.erl die methode startAlgorithm(Grpah, Source_ID, Target_ID) 
-   aufrufen und dann bekommt man die optimale Route zwischen Zwei Knoten heraus. 
+   aufrufen und dann bekommt man die optimale Route zwischen Zwei Knoten heraus, sowie einige anderen Informationen. 

@@ -66,9 +66,13 @@ startAlgorithm(Graph, Source_ID, Target_ID) ->
 	Modify_Graph_2 = { erlang:element(1, Modify_Graph), [], erlang:element(3, Modify_Graph) },
 	
 	%Result
-	%io:fwrite("Zugriffe auf den Graph: "), io:write(1), io:fwrite(" || Optimale Route: "),
-	lists:nth(Index_Of_Target_ID, lists:nth(Index_Of_Source_ID, Distance_Matrix)),
-	Transit_Matrix = lists:nth(2, Result_Distance_Transit_Matrix);
+	io:fwrite("Zugriffe auf den Graph: "), io:write(1), io:fwrite(" || Optimale Route: "), io:write(lists:nth(Index_Of_Target_ID, lists:nth(Index_Of_Source_ID, Distance_Matrix))), io:nl(),
+	io:fwrite("Distance Matrix: "), io:write(lists:nth(1, Result_Distance_Transit_Matrix)), io:nl(),
+	io:fwrite("Transit Matrix: "), io:write(lists:nth(2, Result_Distance_Transit_Matrix)), io:nl(),
+	io:fwrite("Running Way in Vertices ID: "), io:write(floyd_warshall:showWayFromTransitMatrix(lists:nth(2, Result_Distance_Transit_Matrix), Source_ID, Target_ID, graph_adt:getVertexes(Graph))), io:nl(),
+
+	
+	wir_sind_fertig;
 	true ->
 
 		%------------ DER FALL FUER GERICHTETEN GRAPHEN ------------
@@ -90,11 +94,13 @@ startAlgorithm(Graph, Source_ID, Target_ID) ->
 	
 	%Result
 	%io:fwrite("Zugriffe auf den Graph: "), io:write(1), io:fwrite(" || Optimale Route: "),
-	lists:nth(Index_Of_Target_ID, lists:nth(Index_Of_Source_ID, Distance_Matrix)),
+	io:fwrite("Zugriffe auf den Graph: "), io:write(1), io:fwrite(" || Optimale Route: "), io:write(lists:nth(Index_Of_Target_ID, lists:nth(Index_Of_Source_ID, Distance_Matrix))), io:nl(),
+	io:fwrite("Distance Matrix: "), io:write(lists:nth(1, Result_Distance_Transit_Matrix)), io:nl(),
+	io:fwrite("Transit Matrix: "), io:write(lists:nth(2, Result_Distance_Transit_Matrix)), io:nl(),
+	io:fwrite("Running Way in Vertices ID: "), io:write(floyd_warshall:showWayFromTransitMatrix(lists:nth(2, Result_Distance_Transit_Matrix), Source_ID, Target_ID, graph_adt:getVertexes(Graph))), io:nl(),
+	%io:fwrite("Running Way in Vertices ID: "), floyd_warshall:showWayFromTransitMatrix(Graph, Source_ID, Target_ID),
 
-	%TODO hier evtl anpassen
-	%Result -> Die Distance zwischen Zwei Knoten
-	Transit_Matrix = lists:nth(2, Result_Distance_Transit_Matrix)
+	wir_sind_fertig
 	end.
 
 
@@ -260,23 +266,23 @@ lowLevel(Distance_Matrix, Transit_Matrix, J, I, K) ->
 end.
 
 %Die Methode die aufgerufen wird
-showWayFromTransitMatrix(Graph, Source_ID, Target_ID) ->
+showWayFromTransitMatrix(Transit_Matrix, Source_ID, Target_ID, Vertices_List) ->
 	
-	Tran = floyd_warshall:startAlgorithm(Graph, Source_ID, Target_ID),
-	io:write(Tran), io:nl(),
+	%Tran = floyd_warshall:startAlgorithm(Graph, Source_ID, Target_ID),
+	%io:write(Tran), io:nl(),
 	Running_Way = [Target_ID],
 	
-	VerticesList = graph_adt:getVertexes(Graph),
+	%VerticesList = graph_adt:getVertexes(Graph),
 	
 	%Von den IDs die Indizes herausfinden
-	I = index_of(Source_ID, VerticesList),
-	J = index_of(Target_ID, VerticesList),
+	I = index_of(Source_ID, Vertices_List),
+	J = index_of(Target_ID, Vertices_List),
 	
-	showWayFromTransitMatrix(I, J, Source_ID, Tran, Running_Way, Graph).
+	showWayFromTransitMatrix(I, J, Source_ID, Transit_Matrix, Running_Way, Vertices_List).
 	
-showWayFromTransitMatrix(I, J, Source_ID, Transit_Matrix, Running_Way, Graph) -> 
+showWayFromTransitMatrix(I, J, Source_ID, Transit_Matrix, Running_Way, Vertices_List) -> 
 	
-	VerticesList = graph_adt:getVertexes(Graph),
+	%VerticesList = graph_adt:getVertexes(Graph),
 	%io:fwrite("I = "), io:write(I), io:nl(), io:fwrite("J = "), io:write(J), io:nl(),
 	
 	%Zugriff auf die Transit Matrix mit Source und Target ID
@@ -286,10 +292,10 @@ showWayFromTransitMatrix(I, J, Source_ID, Transit_Matrix, Running_Way, Graph) ->
 
 	%Abbruchbedingung
 	if ( Elem_I_J == 0) ->
-		   R = Running_Way ++ [Source_ID], %TODO, hier muss source id rein
+		   R = Running_Way ++ [Source_ID], 
 		   lists:reverse(R);
 	true -> 
-		showWayFromTransitMatrix(I, Elem_I_J, Source_ID, Transit_Matrix, Running_Way ++ [lists:nth(Elem_I_J, VerticesList)], Graph)
+		showWayFromTransitMatrix(I, Elem_I_J, Source_ID, Transit_Matrix, Running_Way ++ [lists:nth(Elem_I_J, Vertices_List)], Vertices_List)
 	end.
 	
 
