@@ -105,7 +105,7 @@ startAlgorithm(Graph, Source_ID, Target_ID) ->
 
 
 %Aufruf der Methode // %Das n unsere quadratischen 2d Matrix
-%Gibt einer Liste von zwei Matrizen zurueck, 
+%Gibt einer Liste von zwei Matrizen zurueck,
 %[1] -> Distance Matrix; [2] -> Transit Matrix
 initialize(Graph) ->
 	{ Vertices, EdgesD, EdgesU } = Graph,

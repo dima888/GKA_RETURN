@@ -1,6 +1,6 @@
 % cd("//Users//Flah//Dropbox//WorkSpace//GKA_RETURN//GKA_PRAKTIKUM//src").
 % c(fordFulkerson).
-% G = graph_parser:importGraph("//Users//Flah//Dropbox//WorkSpace//GKA_RETURN//GKA_PRAKTIKUM//fhwedel.txt", "maxis").
+% G = graph_parser:importGraph("//Users//Flah//Dropbox//WorkSpace//GKA_RETURN//GKA_PRAKTIKUM//Dokumentation//fhwedel.txt", "maxis").
 % G1 = fordFulkerson:fordFulkerson(G).
 
 -module(fordFulkerson).
@@ -200,7 +200,7 @@ markBackwardVertices(ArbitraryMarkedVertex, [H|T], Graph) ->
 			true -> markBackwardVertices(ArbitraryMarkedVertex, T, Graph)
 	end.
 
-% Sucht vom Target den Weg Rückwärts zurücl zum Source und gibt eine Liste zurück mit den Vertices
+% Sucht vom Target den Weg Rückwärts zurück zum Source und gibt eine Liste zurück mit den Vertices
 findPath(Result, Graph) ->
 	Vertex = lists:nth(1, Result),
 	Predecessor = [X || X <- element(1, Graph), (graph_adt:getValV(lists:nth(2, X), name, Graph) == (lists:nthtail(1, element(1, graph_adt:getValV(lists:nth(2, lists:nth(1, Vertex)), marked, Graph)))))],

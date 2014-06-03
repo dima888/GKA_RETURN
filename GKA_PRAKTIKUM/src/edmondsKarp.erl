@@ -1,6 +1,6 @@
 % cd("//Users//Flah//Dropbox//WorkSpace//GKA_RETURN//GKA_PRAKTIKUM//src").
 % c(edmondsKarp).
-% G = graph_parser:importGraph("//Users//Flah//Dropbox//WorkSpace//GKA_RETURN//GKA_PRAKTIKUM//fhwedel.txt", "maxis").
+% G = graph_parser:importGraph("//Users//Flah//Dropbox//WorkSpace//GKA_RETURN//GKA_PRAKTIKUM//Dokumentation//fhwedel.txt", "maxis").
 % G1 = edmondsKarp:edmondsKarp(G).
 
 -module(edmondsKarp).
@@ -17,22 +17,26 @@
 
 edmondsKarp(Graph) ->
 	% Initialisierung durchführen und zu Schritt 2 gehen
-	step2(step1(Graph)).
+	step2(element(1, step1(Graph)), element(2, step1(Graph))).
 
 % Schritt 1 - Initialisierung des Flusses mit 0 für jede Kante
 % Quelle q Markieren mit (undefiniert, ∞)
 step1(Graph) -> 
 	SourceVertex = [X || X <- element(1, Graph), graph_adt:getValV(lists:nth(2, X), name, Graph) == "q"],
-	graph_adt:setValV(lists:nth(2, lists:nth(1, SourceVertex)), marked, {"undefined", "100000"}, initialisierung(Graph, [])).
+	NewQueue = queue:new(),
+	NewGraph = graph_adt:setValV(lists:nth(2, lists:nth(1, SourceVertex)), marked, {"undefined", "100000"}, initialisierung(Graph, [])),
+	SourceVertexModified = [X || X <- element(1, NewGraph), graph_adt:getValV(lists:nth(2, X), name, NewGraph) == "q"],
+	{NewGraph, queue:in(SourceVertexModified, NewQueue)}.
+
 
 % Schritt 2 - Inspektion und Markierung
-step2(Graph) ->
+step2(Graph, Queue) ->
 	% Schritt 2A - Falls alle markierten Knoten inspiziert wurden, gehe zu Schritt 4
 	AllMarkedVerticesInspected = areAllMarkedVerticesInspected(Graph, element(1, Graph), []),
 	
 	if
 		 AllMarkedVerticesInspected == true -> step4(Graph); % Springe zu Schritt 4
-			   						   true -> % Schritt 2B - Wähle eine beliebig markierte, aber noch NICHT inspizierte Ecke vi und
+			   						   true -> % Schritt 2B - Wähle die ältest markierte, aber noch NICHT inspizierte Ecke vi und
 											   % inspiziere sie wie folgt (Berechnung des Inkrements)
 											   %	•(Vorwärtskante) Für jede Kante eij € O(vi) mit unmarkierterm Knoten vj und 
 											   % 	 f(eij) < c(eij) markiere vj mit (+vi, δj), wobei δj die kleinere der beiden Zahlen
@@ -40,15 +44,31 @@ step2(Graph) ->
 											   %	•(Rückwärtskante) Für jede Kante eij € I(vi) mit unmarkiertem Knoten vj und
 											   %	 f(eij) > 0 markiere vj mit (-v, δj), wobei δj die kleinere der beiden Zahlen
 											   %	 f(eij) und δi ist
-											   
+
 											   %io:nl(), io:fwrite("Vor dem markieren!"), io:nl(),
-											   %print(Graph),
+											   %erlang:display(Queue),
 											   %timer:sleep(1000),
-											   AlleMarkedVertices = [X || X <- element(1, Graph), (graph_adt:getValV(lists:nth(2, X), marked, Graph) =/= {"nil", "nil"}) and (graph_adt:getValV(lists:nth(2, X), inspected, Graph) == "false")],
-											   ArbitraryMarkedVertex = lists:nth(1, AlleMarkedVertices),
-											   NewMarkedGraph = forwardEdges(ArbitraryMarkedVertex, backwardEdges(ArbitraryMarkedVertex, graph_adt:setValV(lists:nth(2, ArbitraryMarkedVertex), inspected, "true", Graph))),
+
+											   io:nl(), io:fwrite("Queue: "), erlang:display(Queue), io:nl(),
+
+											   %AlleMarkedVertices = [X || X <- element(1, Graph), (graph_adt:getValV(lists:nth(2, X), marked, Graph) =/= {"nil", "nil"}) and (graph_adt:getValV(lists:nth(2, X), inspected, Graph) == "false")],
+											   %OldestMarkedVertex = lists:nth(1, AlleMarkedVertices),
+											   OldestElementAndRestOfQueue = queue:out(Queue),
+											   {{_, VertexExtracted}, RestQueue} = OldestElementAndRestOfQueue,
+											   Vertex = lists:nth(1, VertexExtracted),
+
+											   io:nl(), io:fwrite("Vertex: "), erlang:display(Vertex), io:nl(),
+											   io:nl(), io:fwrite("RestQueue: "), erlang:display(RestQueue), io:nl(),
+
+											   NewForwardMarkedGraphWithQueue = forwardEdges(Vertex, RestQueue, graph_adt:setValV(lists:nth(2, Vertex), inspected, "true", Graph)),
+
+											   io:nl(), io:fwrite("NewForwardMarkedGraphWithQueue: "), erlang:display(element(1, NewForwardMarkedGraphWithQueue)), io:nl(),
+
+											   NewBackwardMarkedGrapWithQueue = backwardEdges(Vertex, element(2, NewForwardMarkedGraphWithQueue), graph_adt:setValV(lists:nth(2, Vertex), inspected, "true", element(1, NewForwardMarkedGraphWithQueue))),
+											   NewMarkedGraph = element(1, NewBackwardMarkedGrapWithQueue),
+
 											   %io:nl(), io:fwrite("Nach dem markieren!"), io:nl(),
-											   %print(NewMarkedGraph),
+											   %erlang:display(Queue),
 											   %timer:sleep(1000),
 
 											   % Schritt 2C - Falls die Senke markiert ist, gehe zu Schritt 3, sonst zu 2A
@@ -57,7 +77,7 @@ step2(Graph) ->
 
 											   if
 													TargetMarked =/= {"nil", "nil"} -> step3(NewMarkedGraph); % gehe zu Schritt 3
-						  											 		   true -> step2(NewMarkedGraph)  % gehe zu Schritt 2A
+						  											 		   true -> step2(NewMarkedGraph, element(2, NewBackwardMarkedGrapWithQueue))  % gehe zu Schritt 2A
 											   end
 	end.
 
@@ -68,12 +88,14 @@ step3(Graph) ->
 	% für jede Rückwärtskante wird f(eij) um δs vermindert. Anschließend werden bei allen
 	% Knoten mit Ausnahme von q die Markierungen entfernt. Danach wieder zu Schritt 2A
 	
-	%io:fwrite("------- SCHRITT 3 ---------"),
+	io:fwrite("------- SCHRITT 3 ---------"),
 	Target = [X || X <- element(1, Graph), graph_adt:getValV(lists:nth(2, X), name, Graph) == "s"],
 	FoundPath = findPath([Target], Graph),
 	ReversedPath = lists:reverse(FoundPath),
 	NewFlow = setFlow(ReversedPath, Graph),
-	step2(resetMarksAndInspected(element(1, NewFlow), NewFlow)).
+	Queue = queue:new(),
+	Source = [X || X <- element(1, Graph), graph_adt:getValV(lists:nth(2, X), name, Graph) == "q"],
+	step2(resetMarksAndInspected(element(1, NewFlow), NewFlow), queue:in(Source, Queue)).
 
 % Schritt 4 - Es gibt keinen vergrößernden Weg
 step4(Graph) ->
@@ -153,51 +175,60 @@ checkIfInspected(Graph, Vertex) ->
 %	•(Vorwärtskante) Für jede Kante eij € O(vi) mit unmarkierterm Knoten vj und 
 % 	 f(eij) < c(eij) markiere vj mit (+vi, δj), wobei δj die kleinere der beiden Zahlen
 %	 c(eij) - f(eij) und δi ist
-forwardEdges(ArbitraryMarkedVertex, Graph) ->
-	ID = lists:nth(2, ArbitraryMarkedVertex),
+forwardEdges(OldestMarkedVertex, Queue, Graph) ->
+	ID = lists:nth(2, OldestMarkedVertex),
+	%io:fwrite("Vertex"), erlang:display(OldestMarkedVertex), io:nl(), 
+	%io:fwrite("Queue"), erlang:display(Queue), io:nl(),
+	%{Vertex, EdgesD, EdgesU} = Graph,
 	AdjacentVertices = graph_adt:getAdjacent(ID, Graph),
 	ForwardVerticesIDsThatAreNotMarked = [element(2, X) || X <- AdjacentVertices, ((element(1, X) == t) and (graph_adt:getValV(element(2, X), marked, Graph) == {"nil", "nil"}))],
 	ForwardVertices = [X || X <- element(1, Graph), Y <- ForwardVerticesIDsThatAreNotMarked, lists:nth(2, X) == Y],
 	%ForwardVerticesWithFreeSpace = [X || X <- ForwardVertices, list_to_integer(element(1, graph_adt:getValE({ID, lists:nth(2, X)}, maxis, Graph))) > list_to_integer(element(2, graph_adt:getValE({ID, lists:nth(2, X)}, maxis, Graph)))],
-	markForwardVertices(ArbitraryMarkedVertex, ForwardVertices, Graph).
+	markForwardVertices(OldestMarkedVertex, ForwardVertices, Queue, Graph).
 
 % Führt den Schritt der Markierung für die Rückwärtskanten durch
 %	•(Rückwärtskante) Für jede Kante eij € I(vi) mit unmarkiertem Knoten vj und
 %	 f(eij) > 0 markiere vj mit (-v, δj), wobei δj die kleinere der beiden Zahlen
 %	 f(eij) und δi ist
-backwardEdges(ArbitraryMarkedVertex, Graph) ->
-	ID = lists:nth(2, ArbitraryMarkedVertex),
+backwardEdges(OldestMarkedVertex, Queue, Graph) ->
+	ID = lists:nth(2, OldestMarkedVertex),
 	AdjacentVertices = graph_adt:getAdjacent(ID, Graph),
 	BackwardVerticesIDsThatAreNotMarked = [element(2, X) || X <- AdjacentVertices, ((element(1, X) == s) and (graph_adt:getValV(element(2, X), marked, Graph) == {"nil", "nil"}))],
 	BackwardVertices = [X || X <- element(1, Graph), Y <- BackwardVerticesIDsThatAreNotMarked, lists:nth(2, X) == Y],
 	%io:fwrite("BackwardVertices: "), erlang:display(BackwardVertices),
 	%BackwardVerticesWithFreeSpace = [X || X <- BackwardVertices, (list_to_integer(element(2, graph_adt:getValE({ID, lists:nth(2, X)}, maxis, Graph)) > 0))],
-	markBackwardVertices(ArbitraryMarkedVertex, BackwardVertices, Graph).
+	markBackwardVertices(OldestMarkedVertex, BackwardVertices, Queue, Graph).
 
 % Markiert die Vertices für die die Bedingungen zu treffen aus forwardEdges
-markForwardVertices(ArbitraryMarkedVertex, [], Graph) ->
-	Graph;
-markForwardVertices(ArbitraryMarkedVertex, [H|T], Graph) ->
-	Maxis = graph_adt:getValE({lists:nth(2, ArbitraryMarkedVertex), lists:nth(2, H)}, maxis, Graph),
+markForwardVertices(OldestMarkedVertex, [], Queue, Graph) ->
+	{Graph, Queue};
+markForwardVertices(OldestMarkedVertex, [H|T], Queue, Graph) ->
+	Maxis = graph_adt:getValE({lists:nth(2, OldestMarkedVertex), lists:nth(2, H)}, maxis, Graph),
 	Capacity = element(1, Maxis),
 	Flow = element(2, Maxis),
 
 	if
-		Capacity > Flow -> markForwardVertices(ArbitraryMarkedVertex, T, graph_adt:setValV(lists:nth(2, H), marked, {"+" ++ graph_adt:getValV(lists:nth(2, ArbitraryMarkedVertex), name, Graph), integer_to_list(min(list_to_integer(element(1, graph_adt:getValE({lists:nth(2, ArbitraryMarkedVertex), lists:nth(2, H)}, maxis, Graph))) - list_to_integer(element(2, graph_adt:getValE({lists:nth(2, ArbitraryMarkedVertex), lists:nth(2, H)}, maxis, Graph))), list_to_integer(element(2, graph_adt:getValV(lists:nth(2, ArbitraryMarkedVertex), marked, Graph)))))}, Graph));
-				   true -> markForwardVertices(ArbitraryMarkedVertex, T, Graph)
+		Capacity > Flow -> NewGraph = graph_adt:setValV(lists:nth(2, H), marked, {"+" ++ graph_adt:getValV(lists:nth(2, OldestMarkedVertex), name, Graph), integer_to_list(min(list_to_integer(element(1, graph_adt:getValE({lists:nth(2, OldestMarkedVertex), lists:nth(2, H)}, maxis, Graph))) - list_to_integer(element(2, graph_adt:getValE({lists:nth(2, OldestMarkedVertex), lists:nth(2, H)}, maxis, Graph))), list_to_integer(element(2, graph_adt:getValV(lists:nth(2, OldestMarkedVertex), marked, Graph)))))}, Graph),
+						   Vertex = [X || X <- element(1, NewGraph), lists:nth(2, X) == lists:nth(2, H)],
+						   io:nl(), io:fwrite("NEUER VERTEX: "), erlang:display(Vertex), io:nl(),
+						   markForwardVertices(OldestMarkedVertex, T, queue:in([H], Queue), NewGraph);
+				   true -> markForwardVertices(OldestMarkedVertex, T, Queue, Graph)
 	end.
 
 % Markiert die Vertices für die die Bedingungen zu treffen aus backwardEdges
-markBackwardVertices(ArbitraryMarkedVertex, [], Graph) ->
-	Graph;
-markBackwardVertices(ArbitraryMarkedVertex, [H|T], Graph) ->
-	Maxis = graph_adt:getValE({lists:nth(2, H), lists:nth(2, ArbitraryMarkedVertex)}, maxis, Graph),
+markBackwardVertices(OldestMarkedVertex, [], Queue, Graph) ->
+	{Graph, Queue};
+markBackwardVertices(OldestMarkedVertex, [H|T], Queue, Graph) ->
+	Maxis = graph_adt:getValE({lists:nth(2, H), lists:nth(2, OldestMarkedVertex)}, maxis, Graph),
 	%io:fwrite("Maxis: "), erlang:display(Maxis), io:nl(),
 	Flow = list_to_integer(element(2, Maxis)),
 
 	if
-		Flow > 0 -> markBackwardVertices(ArbitraryMarkedVertex, T, graph_adt:setValV(lists:nth(2, H), marked, {"-" ++ graph_adt:getValV(lists:nth(2, ArbitraryMarkedVertex), name, Graph), integer_to_list(min(list_to_integer(element(2, graph_adt:getValE({lists:nth(2, H), lists:nth(2, ArbitraryMarkedVertex)}, maxis, Graph))), list_to_integer(element(2, graph_adt:getValV(lists:nth(2, ArbitraryMarkedVertex), marked, Graph)))))}, Graph));
-			true -> markBackwardVertices(ArbitraryMarkedVertex, T, Graph)
+		Flow > 0 -> NewGraph = graph_adt:setValV(lists:nth(2, H), marked, {"-" ++ graph_adt:getValV(lists:nth(2, OldestMarkedVertex), name, Graph), integer_to_list(min(list_to_integer(element(2, graph_adt:getValE({lists:nth(2, H), lists:nth(2, OldestMarkedVertex)}, maxis, Graph))), list_to_integer(element(2, graph_adt:getValV(lists:nth(2, OldestMarkedVertex), marked, Graph)))))}, Graph),
+					Vertex = [X || X <- element(1, NewGraph), lists:nth(2, X) == lists:nth(2, H)],
+					io:nl(), io:fwrite("NEUER VERTEX RÜCKWÄRTS: "), erlang:display(Vertex), io:nl(),
+					markBackwardVertices(OldestMarkedVertex, T, queue:in([H], Queue), NewGraph);
+			true -> markBackwardVertices(OldestMarkedVertex, T, Queue, Graph)
 	end.
 
 % Sucht vom Target den Weg Rückwärts zurücl zum Source und gibt eine Liste zurück mit den Vertices
