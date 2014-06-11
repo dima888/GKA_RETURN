@@ -123,7 +123,7 @@ maxisDirektedImport(Datei, Graph, V_ID1, V_ID2, Device, Count) ->
 		   ModifyGraph = graph_adt:addVertex(V_ID1, Graph),
 		   
 		   	%Dem Vertex das Attribut hinzu kleben
-			ModifyGraph_2 = graph_adt:setValV(V_ID1, name, TargetValName, ModifyGraph),
+			ModifyGraph_2 = graph_adt:setValV(V_ID1, name, SourceValName, ModifyGraph),
 		   
 		   	%Die schon vorhandene ID ausgraben
 			Buffer = graph_adt:getIDFromAttrValue(TargetValName, ModifyGraph_2),
@@ -239,7 +239,7 @@ maxisUndirektedImport(Datei, Graph, V_ID1, V_ID2, Device, Count) ->
 		   ModifyGraph = graph_adt:addVertex(V_ID1, Graph),
 		   
 		   	%Dem Vertex das Attribut hinzu kleben
-			ModifyGraph_2 = graph_adt:setValV(V_ID1, name, TargetValName, ModifyGraph),
+			ModifyGraph_2 = graph_adt:setValV(V_ID1, name, SourceValName, ModifyGraph),
 		   
 		   	%Die schon vorhandene ID ausgraben
 			Buffer = graph_adt:getIDFromAttrValue(TargetValName, ModifyGraph_2),
@@ -355,7 +355,7 @@ costDirektedImport(Datei, Graph, V_ID1, V_ID2, Device, Count) ->
 		   ModifyGraph = graph_adt:addVertex(V_ID1, Graph),
 		   
 		   	%Dem Vertex das Attribut hinzu kleben
-			ModifyGraph_2 = graph_adt:setValV(V_ID1, name, TargetValName, ModifyGraph),
+			ModifyGraph_2 = graph_adt:setValV(V_ID1, name, SourceValName, ModifyGraph),
 		   
 		   	%Die schon vorhandene ID ausgraben
 			Buffer = graph_adt:getIDFromAttrValue(TargetValName, ModifyGraph_2),
@@ -469,7 +469,7 @@ constUndirektedImport(Datei, Graph, V_ID1, V_ID2, Device, Count) ->
 			ModifyGraph_2 = graph_adt:setValV(V_ID1, name, SourceValName, ModifyGraph),
 		   
 		   	%Die schon vorhandene ID ausgraben 
-			Buffer = graph_adt:getIDFromAttrValue(SourceValName, ModifyGraph_2),
+			Buffer = graph_adt:getIDFromAttrValue(TargetValName, ModifyGraph_2),
 			ExistingID = lists:nth(1, Buffer),
 		   
 		   %Kante hinzu fuegen

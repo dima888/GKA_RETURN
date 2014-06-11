@@ -1,7 +1,7 @@
 % cd("//Users//Flah//Dropbox//WorkSpace//GKA_RETURN//GKA_PRAKTIKUM//src").
 % c(fordFulkersonNachSkizze).
-% G = graph_parser:importGraph("//Users//Flah//Dropbox//WorkSpace//GKA_RETURN//GKA_PRAKTIKUM//Dokumentation//grbuch.txt", "maxis").
-% G1 = fordFulkersonNachSkizze:fordFulkerson(G).
+% G = graph_parser:importGraph("//Users//Flah//Dropbox//WorkSpace//GKA_RETURN//GKA_PRAKTIKUM//Dokumentation//graph9.txt", "maxis").
+% G1 = fordFulkersonNachSkizze:fordFulkerson(G, "Quelle", "Senke").
 
 -module(fordFulkersonNachSkizze).
 
@@ -15,13 +15,20 @@
 %% Internal functions
 %% ====================================================================
 
-fordFulkerson(Graph) ->
-	InitGraphAndCount = initialisierung(Graph, 0),
+fordFulkerson(Graph, SourceName, TargetName) ->
+	SourceID = [lists:nth(2, X) || X <- element(1, Graph), graph_adt:getValV(lists:nth(2, X), name, Graph) == SourceName],
+	TargetID = [lists:nth(2, X) || X <- element(1, Graph), graph_adt:getValV(lists:nth(2, X), name, Graph) == TargetName],
+
+	Graph1 = graph_adt:setValV(lists:nth(1, SourceID), name, "q", Graph),
+	Graph2 = graph_adt:setValV(lists:nth(1, TargetID), name, "s", Graph1),
+
+	InitGraphAndCount = initialisierung(Graph2, 0),
 	findFlowPath(element(1, InitGraphAndCount), element(2, InitGraphAndCount)).
 
 %% Initialisierung des Graphen
 initialisierung(Graph, Counter) -> 
 	SourceVertex = [X || X <- element(1, Graph), graph_adt:getValV(lists:nth(2, X), name, Graph) == "q"],
+	%io:fwrite("SOURCE GEFUDNEN: "), io:write(SourceVertex), io:nl(),
 	{graph_adt:setValV(lists:nth(2, lists:nth(1, SourceVertex)), marked, {"undefined", "576460753303423488"}, initialisierungPrivat(Graph, [])), Counter + 2}.
 
 %% Wege bestimmen
@@ -40,6 +47,9 @@ findFlowPath(Graph, Counter) ->
 											   NewMarkedGraph1AndCounter = backwardEdges(ArbitraryMarkedVertex, graph_adt:setValV(lists:nth(2, ArbitraryMarkedVertex), inspected, "true", NewMarkedGraph), NewCounter1),
 											   NewMarkedGraph1 = element(1, NewMarkedGraph1AndCounter),
 											   NewCounter2 = element(2, NewMarkedGraph1AndCounter),
+
+											   %io:nl(), io:fwrite("Alle Markierten Knoten:"), erlang:display(AlleMarkedVertices), io:nl(),
+											   %erlang:display(NewMarkedGraph1),
 
 											   Target = [X || X <- element(1, NewMarkedGraph1), graph_adt:getValV(lists:nth(2, X), name, NewMarkedGraph1) == "s"],
 											   TargetMarked = graph_adt:getValV(lists:nth(2, lists:nth(1, Target)), marked, NewMarkedGraph1),

@@ -41,7 +41,7 @@ findFlowPath(Graph, Counter) ->
 											   % 	 f(eij) < c(eij) markiere vj mit (+vi, δj), wobei δj die kleinere der beiden Zahlen
 											   %	 c(eij) - f(eij) und δi ist
 											   %	•(Rückwärtskante) Für jede Kante eij € I(vi) mit unmarkiertem Knoten vj und
-											   %	 f(eij) > 0 markiere vj mit (-v, δj), wobei δj die kleinere der beiden Zahlen
+											   %	 f(eij) > 0 markiere vj mit (-vi, δj), wobei δj die kleinere der beiden Zahlen
 											   %	 f(eij) und δi ist
 											   
 											   %io:nl(), io:fwrite("Vor dem markieren!"), io:nl(),

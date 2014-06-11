@@ -1,6 +1,6 @@
 % cd("//Users//Flah//Dropbox//WorkSpace//GKA_RETURN//GKA_PRAKTIKUM//src").
 % c(edmondsKarpNachSkizze).
-% G = graph_parser:importGraph("//Users//Flah//Dropbox//WorkSpace//GKA_RETURN//GKA_PRAKTIKUM//Dokumentation//grbuch.txt", "maxis").
+% G = graph_parser:importGraph("//Users//Flah//Dropbox//WorkSpace//GKA_RETURN//GKA_PRAKTIKUM//Dokumentation//graph8.txt", "maxis").
 % G1 = edmondsKarpNachSkizze:edmondsKarp(G).
 
 -module(edmondsKarpNachSkizze).
